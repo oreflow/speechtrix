@@ -1,0 +1,7 @@
+C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\Speechtrix.exe.config
+C:\Users\Tim\Dropbox\taltek\speechtrix\bin\Debug\Speechtrix.exe.config
+C:\Users\Tim\Dropbox\taltek\speechtrix\bin\Debug\Speechtrix.exe
+C:\Users\Tim\Dropbox\taltek\speechtrix\bin\Debug\Speechtrix.pdb
+C:\Users\Tim\Dropbox\taltek\speechtrix\obj\Debug\Speechtrix.csprojResolveAssemblyReference.cache
+C:\Users\Tim\Dropbox\taltek\speechtrix\obj\Debug\Speechtrix.exe
+C:\Users\Tim\Dropbox\taltek\speechtrix\obj\Debug\Speechtrix.pdb
