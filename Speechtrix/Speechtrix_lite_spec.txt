@@ -1,0 +1,36 @@
+Speechtrix
+
+grafik
+----
+setTime(string)
+setTime(int h, int m, int s)
+setScore(int newScore)
+setNext(short ID)
+setBlock(short ID, int x, int y)
+setStress/Background(boolean b)
+
+game
+----
+bool[32][60] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
+float speed; //hastighet för fallande block
+int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
+int score;
+
+newLevel(); //ändra level -> ändrar speed/poängsätt...
+setSpeed(float ms); //sätter fallhastighet 
+newGame(); //nollställer tid, score, tömmer matris gamefield
+checkEnd(); //när ett block inte får plats i gamefield
+endGame(); //när spelet tar slut
+updateScore(bool block/line); //om poängen är för ett block eller en line 
+checkFullLine(); //kolla om det finns nån rad i matrisen där alla är true, isf anropa deleteLine (måste köras fyra gånger?)
+deleteLine(int lineNumber); //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
+
+
+klass Block: short ID, bool[4][4][4], för varje block 4 rotationer med 16 rutor
+
+
+
+
+music
+----
+wavesurfer
