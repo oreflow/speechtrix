@@ -5,59 +5,80 @@
     <WindowsUser>Tim</WindowsUser>
     <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
     <PackageArchitecture>neutral</PackageArchitecture>
+    <RegisteredManifestChecksum>D5B4D989873AE1AFB7709DC80585276F3A48B337F0109F65A11816BB47B2C77A</RegisteredManifestChecksum>
+    <RegisteredPackageMoniker>36b61a61-1d35-4f36-b255-fa10492be282_1.0.0.0_neutral__2rk7jkcx89dyp</RegisteredPackageMoniker>
+    <RegisteredUserModeAppID>36b61a61-1d35-4f36-b255-fa10492be282_2rk7jkcx89dyp!App</RegisteredUserModeAppID>
+    <RegisteredPackageID>36b61a61-1d35-4f36-b255-fa10492be282</RegisteredPackageID>
+    <RegisteredPackagePublisher>CN=Tim</RegisteredPackagePublisher>
+    <RegisteredVersion>1.0.0.0</RegisteredVersion>
   </PropertyGroup>
   <ItemGroup>
     <AppXManifest Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2013-02-18T13:15:54.049</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\Speechtrix.exe">
       <PackagePath>Speechtrix.exe</PackagePath>
+      <Modified>2013-02-18T13:15:53.869</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\Speechtrix.pdb">
       <PackagePath>Speechtrix.pdb</PackagePath>
+      <Modified>2013-02-18T13:15:53.722</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\Logo.png">
       <PackagePath>Assets\Logo.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-15T19:42:52.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\SmallLogo.png">
       <PackagePath>Assets\SmallLogo.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-15T19:42:52.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\SplashScreen.png">
       <PackagePath>Assets\SplashScreen.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-15T19:42:52.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\StoreLogo.png">
       <PackagePath>Assets\StoreLogo.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-15T19:42:52.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\LightGray.png">
       <PackagePath>Assets\LightGray.png</PackagePath>
+      <Modified>2011-12-12T21:08:56.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\MediumGray.png">
       <PackagePath>Assets\MediumGray.png</PackagePath>
+      <Modified>2011-12-12T21:08:56.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\Assets\DarkGray.png">
       <PackagePath>Assets\DarkGray.png</PackagePath>
+      <Modified>2011-12-12T21:08:56.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\App.xaml">
       <PackagePath>App.xaml</PackagePath>
+      <Modified>2013-02-18T13:01:51.863</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\Common\StandardStyles.xaml">
       <PackagePath>Common\StandardStyles.xaml</PackagePath>
+      <Modified>2012-06-26T15:19:20.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\ItemsPage.xaml">
       <PackagePath>ItemsPage.xaml</PackagePath>
+      <Modified>2013-02-18T13:01:51.970</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\SplitPage.xaml">
       <PackagePath>SplitPage.xaml</PackagePath>
+      <Modified>2013-02-18T13:01:52.039</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Tim\Dropbox\taltek\speechtrix\Speechtrix\bin\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
+      <Modified>2013-02-18T13:03:07.614</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
