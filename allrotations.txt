@@ -1,0 +1,147 @@
+id 0, rotation 0
+rotation[0][x][y]
+{{true,true,false,false},
+{true,false,false,false},
+{true,false,false,false},
+{false,false,false,false}}
+id 0, rotation 1
+{{true,true,true,false},
+{false,false,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 0, rotation 2
+{{false,true,false,false},
+{false,true,false,false},
+{true,true,false,false},
+{false,false,false,false}}
+id 0, rotation 3
+{{true,false,false,false},
+{true,true,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 1, rotation 0
+{{true,false,false,false},
+{true,false,false,false},
+{true,false,false,false},
+{true,false,false,false}}
+id 1, rotation 1
+{{true,true,true,true},
+{false,false,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 1, rotation 2
+{{true,false,false,false},
+{true,false,false,false},
+{true,false,false,false},
+{true,false,false,false}}
+id 1, rotation 3
+{{true,true,true,true},
+{false,false,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 2, rotation 0
+{{true,true,false,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 2, rotation 1
+{{true,true,false,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 2, rotation 2
+{{true,true,false,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 2, rotation 3
+{{true,true,false,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 3, rotation 0
+{{true,false,false,false},
+{true,true,false,false},
+{false,true,false,false},
+{false,false,false,false}}
+id 3, rotation 1
+{{false,true,true,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 3, rotation 2
+{{true,false,false,false},
+{true,true,false,false},
+{false,true,false,false},
+{false,false,false,false}}
+id 3, rotation 3
+{{false,true,true,false},
+{true,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 4, rotation 0
+{{false,true,false,false},
+{true,true,false,false},
+{true,false,false,false},
+{false,false,false,false}}
+id 4, rotation 1
+{{true,true,false,false},
+{false,true,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 4, rotation 2
+{{false,true,false,false},
+{true,true,false,false},
+{true,false,false,false},
+{false,false,false,false}}
+id 4, rotation 3
+{{true,true,false,false},
+{false,true,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 5, rotation 0
+{{false,true,false,false},
+{true,true,false,false},
+{false,true,false,false},
+{false,false,false,false}}
+id 5, rotation 1
+{{false,true,false,false},
+{true,true,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 5, rotation 2
+{{true,false,false,false},
+{true,true,false,false},
+{true,false,false,false},
+{false,false,false,false}}
+id 5, rotation 3
+{{true,true,true,false},
+{false,true,false,false},
+{false,false,false,false},
+{false,false,false,false}}
+
+id 6, rotation 0
+{{true,true,false,false},
+{false,true,false,false},
+{false,true,false,false},
+{false,false,false,false}}
+id 6, rotation 1
+{{false,false,true,false},
+{true,true,true,false},
+{false,false,false,false},
+{false,false,false,false}}
+id 6, rotation 2
+{{true,false,false,false},
+{true,false,false,false},
+{true,true,false,false},
+{false,false,false,false}}
+id 6, rotation 3
+{{true,true,true,false},
+{true,false,false,false},
+{false,false,false,false},
+{false,false,false,false}}
