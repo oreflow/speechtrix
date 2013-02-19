@@ -13,11 +13,15 @@ namespace Speechtrix
     class Graphics
     {
          private static Surface screen;
-        static bool fullScreen;
-        static int SCREEN_HEIGHT = 500; // (int) System.Windows.SystemParameters.PrimaryScreenHeight;
-        static int SCREEN_WIDTH = 600; //(int) System.Windows.SystemParameters.PrimaryScreenWidth;
+        static bool fullScreen = true;
+        static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
+        static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
         static int blockX;
+        static int blockSize;
+        static bool debug = true;
+        static Color gridColor1;
+        static Color gridColor2;
 
         static bool backgroundCached = false; 
         static Color[,] backgroundCache = new Color[SCREEN_WIDTH, SCREEN_HEIGHT];
@@ -28,9 +32,9 @@ namespace Speechtrix
 
         public Graphics()
         {
-            fullScreen = false;
-            blockY = 20;
-            blockX = 15;
+            fullScreen = true;
+            blockY = 15;
+            blockX = 10;
             tetriBoard = new bool[blockX, blockY];
             currentColor = new Color[blockX, blockY]; 
 
@@ -42,7 +46,6 @@ namespace Speechtrix
                     swit = !swit;
                 for(int y = 0; y < blockY; y++)
                 {
-                    // fixa så att det itne buggar med färgerna om det blir udda antal rader
                     if (swit)
                         currentColor[i, y] = Color.FromArgb(0, 0, 0);
                     else
@@ -64,12 +67,14 @@ namespace Speechtrix
 
         public Graphics(int Xsize, int Ysize)
         {
-            fullScreen = true;
             blockY = Ysize;
             blockX = Xsize;
 
             tetriBoard = new bool[blockX, blockY];
-            currentColor = new Color[blockX, blockY]; 
+            currentColor = new Color[blockX, blockY];
+
+            gridColor1 = Color.FromArgb(100,100,100);
+            gridColor2 = Color.FromArgb(255, 255, 255);
 
             bool swit = false;
             for (int i = 0; i < blockX; i++)
@@ -78,11 +83,10 @@ namespace Speechtrix
                     swit = !swit;
                 for (int y = 0; y < blockY; y++)
                 {
-                    // fixa så att det itne buggar med färgerna om det blir udda antal rader
                     if (swit)
-                        currentColor[i, y] = Color.FromArgb(0, 0, 0);
+                        currentColor[i, y] = gridColor1;
                     else
-                        currentColor[i, y] = Color.FromArgb(255, 255, 255);
+                        currentColor[i, y] = gridColor2;
                     swit = !swit;
                 }
             }
@@ -92,6 +96,8 @@ namespace Speechtrix
 
 
             Draw();
+
+
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Run();
         }
@@ -99,7 +105,7 @@ namespace Speechtrix
         private static void Draw()
         {
             DrawBackground();
-            int blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
+            blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
 
               int startX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
               int startY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
@@ -108,13 +114,16 @@ namespace Speechtrix
             {
                 for (int y = 0; y < blockY ; y++)
                 {
-                    //screen.Draw(new Point(startX + x * blockSize , startY + y * blockSize),currentColor[x,y]);
                     FillRect(startX + x * blockSize, startY + y * blockSize, blockSize, currentColor[x,y]);
                 }
             }
-
-            DrawTimer(10,26,45);
-            DrawScore(0);
+            if (debug)
+            {
+                DrawTimer(01, 06, 45);
+                DrawScore(0);
+                DrawBlock(0, 5, 5, Color.FromArgb(0, 122, 0));
+                DrawNextBlock(0, Color.FromArgb(0, 122, 0));
+            }
             screen.Update();
         }
 
@@ -131,8 +140,61 @@ namespace Speechtrix
                     screen.Draw(new Point(x, y), col);
         }
 
+        private static void DrawNextBlock(short blockID, Color col)
+        {
+            
+            // Draw "next" GRID
+            bool nextGrid = false;
+
+            int startX = (int)(SCREEN_WIDTH * 0.75);
+            int startY = (int)(SCREEN_HEIGHT * 0.55);
+            bool swit = false;
+            int nextBlockSize = (int)(SCREEN_WIDTH * 0.05);
+
+            if (nextGrid)
+            {
+                
+                for (int x = 0; x < 4; x++)
+                {
+                    swit = !swit;
+                    for (int y = 0; y < 4; y++)
+                    {
+                        if (swit)
+                            FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, gridColor1);
+                        else
+                            FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, gridColor2);
+                        swit = !swit;
+                    }
+                }
+            }
+
+            // Draw the block on the GRID
+            //TODO replace with getter for a block, rotation index 0
+            bool [,] block = {{true,true,false,false},{true,false,false,false},{true,false,false,false},{false,false,false,false}};
+
+            for (int x = 0; x < 4; x++)
+            {
+                for (int y = 0; y < 4; y++)
+                {
+                    if(block[x,y])
+                        FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
+                }
+            }
+
+
+
+        }
+
+        private static void DrawBlock(short blockID, int Xpos, int Ypos, Color col)
+        {
+
+        }
+
         private static void DrawTimer(int hour, int minute, int second)
         {
+            Color background = Color.FromArgb(255, 102, 0);
+            Color fontColor = Color.FromArgb(255, 255, 255);
+
             if (hour > 99 || minute > 59 || second > 59 || hour < 0 || minute < 0 || second < 0)
                 hour = minute = second = 0;
 
@@ -141,23 +203,54 @@ namespace Speechtrix
             int timerX = (int)(SCREEN_WIDTH * 0.75);
             int timerY = (int)(SCREEN_HEIGHT * 0.2);
 
-            FillRect(timerX, timerY, timerWidth, timerHeight, Color.FromArgb(255, 102, 0));
+            FillRect(timerX, timerY, timerWidth, timerHeight, background);
             int numberSize = (int)(timerWidth/5);
 
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(0,1)), Color.FromArgb(255, 255, 255), numberSize);
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(1,1)), Color.FromArgb(255, 255, 255), numberSize);
-
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 2 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(0, 1)), Color.FromArgb(255, 255, 255), numberSize);
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 3 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(1, 1)), Color.FromArgb(255, 255, 255), numberSize);
-
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 4 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(0, 1)), Color.FromArgb(255, 255, 255), numberSize);
-            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 5 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(1, 1)), Color.FromArgb(255, 255, 255), numberSize);
 
 
+            if (hour.ToString().Length > 1)
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(0, 1)), fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(1, 1)), fontColor, numberSize);
+            }
+            else
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4), (int)(timerY + 0.1 * timerHeight), 0, fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(0, 1)), fontColor, numberSize);
+            }
+            FillRect((int)(timerX + numberSize / 2 * 0 * 1.4 + numberSize * 1.5), (int)(timerY + 0.3 * timerHeight), (int)(0.05 * timerHeight), fontColor);
+            FillRect((int)(timerX + numberSize / 2 * 0 * 1.4 + numberSize * 1.5), (int)(timerY + 0.5 * timerHeight), (int)(0.05 * timerHeight), fontColor);
+
+            if (minute.ToString().Length > 1)
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4 + numberSize * 1.5), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(0, 1)), fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4 + numberSize * 1.5), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(1, 1)), fontColor, numberSize);
+            }
+            else
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4 + numberSize * 1.5), (int)(timerY + 0.1 * timerHeight), 0, fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4 + numberSize * 1.5), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(0, 1)), fontColor, numberSize);
+            }
+            FillRect((int)(timerX + numberSize / 2 * 0 * 1.4 + numberSize * 3), (int)(timerY + 0.3 * timerHeight), (int)(0.05 * timerHeight), fontColor);
+            FillRect((int)(timerX + numberSize / 2 * 0 * 1.4 + numberSize * 3), (int)(timerY + 0.5 * timerHeight), (int)(0.05 * timerHeight), fontColor);
+
+            if (second.ToString().Length > 1)
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4 + numberSize * 3), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(0, 1)), fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4 + numberSize * 3), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(1, 1)), fontColor, numberSize);
+            }
+            else
+            {
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4 + numberSize * 3), (int)(timerY + 0.1 * timerHeight), 0, fontColor, numberSize);
+                DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4 + numberSize * 3), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(0, 1)), fontColor, numberSize);
+            }
         }
 
         private static void DrawScore(int score)
         {
+            Color background = Color.FromArgb(255, 102, 0);
+            Color fontColor = Color.FromArgb(255, 255, 255);
+
             if(score < 0 || score > 99999999)
                 score = 0;
 
@@ -166,7 +259,7 @@ namespace Speechtrix
             int scoreX = (int)(SCREEN_WIDTH * 0.75);
             int scoreY = (int)(SCREEN_HEIGHT * 0.4);
 
-            FillRect(scoreX, scoreY, scoreWidth, scoreHeight, Color.FromArgb(255, 102, 0));
+            FillRect(scoreX, scoreY, scoreWidth, scoreHeight, background);
             String scorestr = score.ToString();
 
             int numberSize = (int)(scoreHeight * 0.8);
@@ -176,11 +269,11 @@ namespace Speechtrix
                 if (i < scorestr.Length)
                 {
                     int tmp = Convert.ToInt32(scorestr.Substring(i,1));
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, Color.FromArgb(255, 255, 255), numberSize);
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, fontColor, numberSize);
                 }
                 else
                 {
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, Color.FromArgb(255, 255, 255), numberSize);
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, fontColor, numberSize);
                 }
 
 
@@ -292,6 +385,7 @@ namespace Speechtrix
                 for (int x = 0; x < SCREEN_WIDTH; x++)
                     for (int y = 0; y < SCREEN_HEIGHT; y++)
                         screen.Draw(new Point(x, y), backgroundCache[x,y]);
+
             Vector topLeft = new Vector(255,0,0); // red
 	        Vector topRight = new Vector(0,0,255); // blue
 	        Vector bottomLeft = new Vector(0,255,0); // green
@@ -337,23 +431,23 @@ namespace Speechtrix
         // **** Public methods ****
         public void setTime(String time)
         {
-
+            
         }
         public void setTime(int hours, int minutes, int seconds)
         {
-
+            DrawTimer(hours, minutes, seconds);
         }
         public void setScore(int score)
         {
             DrawScore(score);
         }
-        public void setNext(short blockID)
+        public void setNext(short blockID, Color col)
         {
-
+            DrawNextBlock(blockID, col);
         }
-        public void setBlock(short blockID, int Xpos, int Ypos)
+        public void setBlock(short blockID, int Xpos, int Ypos, Color col)
         {
-
+            DrawBlock(blockID, Xpos, Ypos, col);
         }
         public void removeRow(int rownr)
         {
