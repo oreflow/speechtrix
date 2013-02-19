@@ -14,8 +14,8 @@ namespace Speechtrix
     {
          private static Surface screen;
         static bool fullScreen;
-        static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
-        static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
+        static int SCREEN_HEIGHT = 500; // (int) System.Windows.SystemParameters.PrimaryScreenHeight;
+        static int SCREEN_WIDTH = 600; //(int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
         static int blockX;
 
@@ -28,7 +28,7 @@ namespace Speechtrix
 
         public Graphics()
         {
-            fullScreen = true;
+            fullScreen = false;
             blockY = 20;
             blockX = 15;
             tetriBoard = new bool[blockX, blockY];
@@ -56,6 +56,8 @@ namespace Speechtrix
 
             
             Draw();
+
+            
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Run();
         }
@@ -110,6 +112,9 @@ namespace Speechtrix
                     FillRect(startX + x * blockSize, startY + y * blockSize, blockSize, currentColor[x,y]);
                 }
             }
+
+            DrawTimer(10,26,45);
+            DrawScore(0);
             screen.Update();
         }
 
@@ -119,11 +124,74 @@ namespace Speechtrix
                 for(int y = posY; y<(posY+size);y++)
                     screen.Draw(new Point(x, y), col);
         }
+        private static void FillRect(int posX, int posY, int sizeX,int sizeY, Color col)
+        {
+            for (int x = posX; x < (posX + sizeX); x++)
+                for (int y = posY; y < (posY + sizeY); y++)
+                    screen.Draw(new Point(x, y), col);
+        }
+
+        private static void DrawTimer(int hour, int minute, int second)
+        {
+            if (hour > 99 || minute > 59 || second > 59 || hour < 0 || minute < 0 || second < 0)
+                hour = minute = second = 0;
+
+            int timerWidth = (int) (SCREEN_WIDTH * 0.2);
+            int timerHeight = (int) (timerWidth/3);
+            int timerX = (int)(SCREEN_WIDTH * 0.75);
+            int timerY = (int)(SCREEN_HEIGHT * 0.2);
+
+            FillRect(timerX, timerY, timerWidth, timerHeight, Color.FromArgb(255, 102, 0));
+            int numberSize = (int)(timerWidth/5);
+
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 0 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(0,1)), Color.FromArgb(255, 255, 255), numberSize);
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(hour.ToString().Substring(1,1)), Color.FromArgb(255, 255, 255), numberSize);
+
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 2 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(0, 1)), Color.FromArgb(255, 255, 255), numberSize);
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 3 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(minute.ToString().Substring(1, 1)), Color.FromArgb(255, 255, 255), numberSize);
+
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 4 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(0, 1)), Color.FromArgb(255, 255, 255), numberSize);
+            DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 5 * 1.4), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(1, 1)), Color.FromArgb(255, 255, 255), numberSize);
+
+
+        }
+
+        private static void DrawScore(int score)
+        {
+            if(score < 0 || score > 99999999)
+                score = 0;
+
+            int scoreWidth = (int) (SCREEN_WIDTH * 0.2);
+            int scoreHeight = (int) (scoreWidth/4.5);
+            int scoreX = (int)(SCREEN_WIDTH * 0.75);
+            int scoreY = (int)(SCREEN_HEIGHT * 0.4);
+
+            FillRect(scoreX, scoreY, scoreWidth, scoreHeight, Color.FromArgb(255, 102, 0));
+            String scorestr = score.ToString();
+
+            int numberSize = (int)(scoreHeight * 0.8);
+
+            for (int i = 0; i < 8; i++)
+            {
+                if (i < scorestr.Length)
+                {
+                    int tmp = Convert.ToInt32(scorestr.Substring(i,1));
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, Color.FromArgb(255, 255, 255), numberSize);
+                }
+                else
+                {
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, Color.FromArgb(255, 255, 255), numberSize);
+                }
+
+
+            }
+        }
 
         private static void DrawNumber(int posX, int posY, int nr, Color col, int size)
         {
             if (nr > 9 || nr < 0)
                 return;
+            
 
             // draws a number using 7 different lines as an alarm clock.
             bool[,] numbers = {
@@ -142,7 +210,77 @@ namespace Speechtrix
             short tmpWidth = 0;
             for (int i = 0; i < size / 2; i++)
             {
-                if(i < size/2)
+                if (i < size / 2 * 0.1)
+                    width[i] = tmpWidth;
+                else if (i < size / 2 * 0.2)
+                {
+                    tmpWidth += 1;
+                    width[i] = tmpWidth;
+                }
+                else if (i < size / 2 * 0.8)
+                {
+                    width[i] = tmpWidth;
+                }
+                else if (i < size / 2 * 0.9)
+                {
+                    tmpWidth -= 1;
+                    width[i] = tmpWidth;
+                }
+                else if (i < size / 2)
+                {
+                    width[i] = tmpWidth;
+                }
+                
+            }
+
+            // draw out stuff
+            if (numbers[nr, 0] == true)
+            {
+                for(int x = 0; x < size/2 ; x++)
+                    for(int y = 0 ; y < width[x] ; y++)
+                        screen.Draw(new Point(posX + x, posY + y), col);
+            
+            }
+            if (numbers[nr, 1] == true)
+            {
+                for (int y = 0; y < size / 2; y++)
+                    for (int x = 0; x < width[y]; x++)
+                        screen.Draw(new Point(posX + x, posY + y), col);
+
+            }
+            if (numbers[nr, 2] == true)
+            {
+                for (int y = 0; y < size / 2; y++)
+                    for (int x = 0; x < width[y]; x++)
+                        screen.Draw(new Point(size/2 + posX - x, posY + y), col);
+
+            }
+            if (numbers[nr, 3] == true)
+            {
+                for (int x = 0; x < size / 2; x++)
+                    for (int y = 0; y < width[x]; y++)
+                        screen.Draw(new Point(posX + x, size/2 + posY + y), col);
+
+            }
+            if (numbers[nr, 4] == true)
+            {
+                for (int y = 0; y < size / 2; y++)
+                    for (int x = 0; x < width[y]; x++)
+                        screen.Draw(new Point(posX + x,size/2 + posY + y), col);
+
+            }
+            if (numbers[nr, 5] == true)
+            {
+                for (int y = 0; y < size / 2; y++)
+                    for (int x = 0; x < width[y]; x++)
+                        screen.Draw(new Point(size/2 + posX - x, size/2 + posY + y), col);
+
+            }
+            if (numbers[nr, 6] == true)
+            {
+                for (int x = 0; x < size / 2; x++)
+                    for (int y = 0; y < width[x]; y++)
+                        screen.Draw(new Point(posX + x, size + posY - y), col);
 
             }
 
@@ -207,7 +345,7 @@ namespace Speechtrix
         }
         public void setScore(int score)
         {
-
+            DrawScore(score);
         }
         public void setNext(short blockID)
         {
@@ -217,7 +355,7 @@ namespace Speechtrix
         {
 
         }
-        public void removeRow()
+        public void removeRow(int rownr)
         {
 
         }
