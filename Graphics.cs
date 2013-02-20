@@ -17,7 +17,7 @@ namespace Speechtrix
     {
         static bool debug = false;
         private static Surface screen;
-        static bool fullScreen = true;
+        static bool fullScreen = false;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
@@ -177,7 +177,7 @@ namespace Speechtrix
                 // draw an example block 
                 DrawBlock(0, 0, 2, 2, Color.FromArgb(0, 122, 0));
                 // draw and example "next block"
-                DrawNextBlock(0, Color.FromArgb(0, 122, 0));
+                DrawNextBlock(0, 0, Color.FromArgb(0, 122, 0));
             }
         }
 
@@ -273,7 +273,7 @@ namespace Speechtrix
         /*
          * Draws out the given block as "next-block"
          */
-        private static void DrawNextBlock(short blockID, Color col)
+        private static void DrawNextBlock(short blockID, short rotation, Color col)
         {
             
             // Draw "next" GRID
@@ -305,7 +305,7 @@ namespace Speechtrix
 
             // Draw the block on the GRID
          
-		   bool [,] block = Blocks.getRotations(blockID, 0);
+		   bool [,] block = Blocks.getRotations(blockID, rotation);
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                     if(block[x,y])
@@ -651,11 +651,11 @@ namespace Speechtrix
             DrawScore(score);
             screen.Update();
         }
-        public void setNext(short blockID, Color col)
+        public void setNext(short blockID, short rotation, Color col)
         {
             if (!running)
                 return;
-            DrawNextBlock(blockID, col);
+            DrawNextBlock(blockID, rotation, col);
             screen.Update();
         }
         public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)

@@ -19,7 +19,7 @@ namespace Speechtrix
                 Color.FromArgb(12, 0, 247), Color.FromArgb(255, 240, 0), Color.FromArgb(122, 78, 156),
                 Color.FromArgb(45, 237, 120)};
 
-        
+        bool newBlock;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
@@ -30,19 +30,14 @@ namespace Speechtrix
 		Graphics g;
         Thread tt;
         Thread graphicsThread;
-        Block current, next;
+        LogicBlock current, next;
         Random rand;
 
         public Speechtrix()
         {
             rand = new Random();
             gamefield = new bool[maxSizeRow,maxSizeCol];
-            speed = 10;
-            level = 1;
-            score = 0;
 			linesToNextLevel = nextLevelLines;
-            current = new Block((short) rand.Next(0,7));
-            next = new Block((short) rand.Next(0,7));
 
 			startRow = 0; startCol = 0;
 			height = 20; width = 10;
@@ -70,6 +65,69 @@ namespace Speechtrix
                 
 		//	}
         }
+        void newGame() //nollställer tid, score, level, tömmer matris gamefield
+        {
+            for (int i = startRow; i < endRow; i++)
+                for (int j = startCol; j < endCol; j++)
+                    gamefield[i, j] = false;
+
+            speed = 1500;
+            level = 1;
+            score = 0;
+            linesToNextLevel = nextLevelLines;
+
+            TimerThread timer = new TimerThread(ref g);
+            tt = new Thread(new ThreadStart(timer.Run));
+            tt.Start();
+            updateScore(2523);
+        }
+
+
+        //change size when rotating
+        short blockXSize(bool[,] bl)
+        {
+            short count = 0;
+            short max = 0;
+            for (int j=0; j<4; j++)
+            {
+                count = 0;
+                for (int i=0; i<4; i++)
+                {
+                    if (bl[i,j]){
+                        count++;
+                    }
+                    else if (count>0 && bl[i,j])
+                    {
+                        if (count > max)
+                            max = count;
+                    }
+                }
+            }
+            return max;
+        }
+        //change size when rotating
+        short blockYSize(bool[,] bl)
+        {
+            short count = 0;
+            short max = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                count = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (bl[j, i])
+                    {
+                        count++;
+                    }
+                    else if (count > 0 && bl[j, i])
+                    {
+                        if (count > max)
+                            max = count;
+                    }
+                }
+            }
+            return max;
+        }
 
 
 
@@ -77,17 +135,51 @@ namespace Speechtrix
         /*************************************************/
         void play()
         {
+            LogicBlock current = new LogicBlock();
+            LogicBlock next = new LogicBlock();
             
-            for (short i=0; !checkEnd() && i<2000; i++)
+            next.nr = (short)rand.Next(0, 7);
+            next.rot = (short)rand.Next(0, 4);
+            next.blo = Blocks.getRotations(next.nr, next.rot);
+            next.bxs = blockXSize(next.blo);
+            next.bys = blockYSize(next.blo);
+            next.y = 0;
+            next.x = (short) (width / 2 - next.bxs / 2);
+
+            newBlock = true;
+
+            for (short i=0; !checkEnd(); i++)
             {
-                short bs = (short) rand.Next(0, 7);
-                g.setBlock(bs, (short)rand.Next(0, 4), (short)rand.Next(0, width-4), (short)rand.Next(0, height-4), cola[bs]);
+                if (newBlock)
+                {
+                    newBlock = false;
+                    
+                    current = next;
+                    
+                    next.nr = (short)rand.Next(0, 7);
+                    next.rot = (short)rand.Next(0, 4);
+                    next.blo = Blocks.getRotations(next.nr, next.rot);
+                    next.bxs = blockXSize(next.blo);
+                    next.bys = blockYSize(next.blo);
+                    next.y = 0;
+                    next.x = (short)(width / 2 - next.bxs / 2);
+                    next.color = cola[next.nr];
+                    
+                    g.setNext(next.nr, next.rot, next.color);
+                    g.setBlock(current.nr,current.rot,current.x,current.y,current.color);
+                    Debug.Print("Sizes: " + current.x + " " + current.y);
+                }
 
-
-
-
-
-
+                if (true)
+                {
+                    //g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
+                    newBlock = true;
+                }
+                else
+                {
+                    current.y++; //falling
+                    g.setBlock(current.nr, current.rot, current.x, current.y, current.color); //paint
+                }
 
                 Thread.Sleep(speed);
             }
@@ -96,7 +188,11 @@ namespace Speechtrix
         /*************************************************/
 
 
-
+        bool checkRowBelow()
+        {
+            for (int i=0; i<width; i++) ;
+            return false;
+        }
 
         void newLevel() //ändra level -> ändrar speed/poängsätt...
         {
@@ -109,25 +205,7 @@ namespace Speechtrix
 		{
 			speed = ms;
 		}
-        void newGame() //nollställer tid, score, level, tömmer matris gamefield
-		{
-			for (int i=startRow; i<endRow; i++)
-				for (int j=startCol; j<endCol; j++)
-					gamefield[i,j] = false;
-
-            current = new Block((short)rand.Next(0, 7));
-            next = new Block((short)rand.Next(0, 7));
-
-			speed = 10;
-            level = 1;
-            score = 0;
-			linesToNextLevel = nextLevelLines;
-
-            TimerThread timer = new TimerThread(ref g);
-            tt = new Thread(new ThreadStart(timer.Run));
-            tt.Start();
-            updateScore(2523);
-		}
+        
         bool checkEnd() //när ett block inte får plats i gamefield
 		{
             bool end = false;
@@ -241,5 +319,17 @@ namespace Speechtrix
             }
         }
 
+    }
+
+    class LogicBlock
+    {
+        public short nr, x, y, bxs, bys, rot;
+        public Color color;
+        public bool[,] blo = new bool[4,4];
+
+        public LogicBlock()
+        {
+            blo = new bool[4,4];
+        }      
     }
 }
