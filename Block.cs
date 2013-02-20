@@ -21,18 +21,10 @@ namespace Speechtrix
             initRotations();
         }
 
-		public bool[][,] getRot()
+		public bool[,] getRot(short rot)
 		{
-			return rotations;
-		}
-		public void setId(short pId)
-		{
-			id = pId;
-			initRotations();
-		}
-		public short getId()
-		{
-			return id;
+			return rotations[rot];
+	
 		}
         void initRotations()
         {
