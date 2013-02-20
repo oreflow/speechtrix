@@ -41,6 +41,7 @@ namespace Speechtrix
        static int currentBlockY = 0;
        static bool[,] currentBlock = new bool [4,4];
        static bool running;
+       static Speechtrix callBack;
 
 
         public Graphics()
@@ -50,8 +51,11 @@ namespace Speechtrix
         /*
          * Constructor taking the game-field size as arguments
          */
-        public Graphics(int Xsize, int Ysize)
+        public Graphics(int Xsize, int Ysize, Speechtrix _callBack)
         {
+            callBack = _callBack;
+
+
             blockY = Ysize;
             blockX = Xsize;
 
@@ -101,19 +105,19 @@ namespace Speechtrix
             switch (args.Key)
             {
                 case Key.UpArrow:
-                    DrawScore(10);
+                    callBack.keyUp();
                     break;
 
                 case Key.DownArrow:
-                    DrawScore(2580);
+                    callBack.keyDown();
                     break;
 
                 case Key.LeftArrow:
-                    DrawBlock(0, 0, 2, 2, Color.FromArgb(0, 122, 0));
+                    callBack.keyLeft();
                     break;
 
                 case Key.RightArrow:
-                    DrawBlock(0, 0, 5, 10, Color.FromArgb(0, 122, 0));
+                    callBack.keyRight();
                     break;
 
                 case Key.Escape:
@@ -138,11 +142,11 @@ namespace Speechtrix
             }
         }
         /**
-         * The main Drawing function, draws the game-field
+         * Draws the game-field
          */
         private static void Draw()
         {
-              // draws out the current "game-field"
+              // draws out the current "game-field", animated since it updates screen for each column
             for(int x = 0 ; x < blockX ; x++)
             {
                 for (int y = 0; y < blockY ; y++)
@@ -500,12 +504,12 @@ namespace Speechtrix
                     screen.Draw(new Point(x, y), Color.FromArgb((int)colors[x].X,(int)colors[x].Y,(int)colors[x].Z));
                     backgroundCache[x, y] = Color.FromArgb((int)colors[x].X, (int)colors[x].Y, (int)colors[x].Z);
 		        }
-                screen.Update();
+                screen.Update(); // comment this row to remove background animation
 	        }
             backgroundCached = true;
         }
         /*
-         * interpolates between two Vectors, returns the interpolation in varable result
+         * interpolates between two Vectors, returns the interpolation in the array <result>
          */
         private static void Interpolate(Vector a, Vector b, ref Vector [] result)
         {

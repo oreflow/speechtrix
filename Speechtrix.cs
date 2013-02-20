@@ -134,6 +134,22 @@ namespace Speechtrix
             g.removeRow(lineNumber);
 			//anropa deleteLine i graphics
 		}
+        public void keyUp()
+        {
+
+        }
+        public void keyDown()
+        {
+
+        }
+        public void keyLeft()
+        {
+
+        }
+        public void keyRight()
+        {
+
+        }
     }
     class TimerThread
     {
