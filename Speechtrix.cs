@@ -131,6 +131,7 @@ namespace Speechtrix
 					gamefield[i, j] = gamefield[i - 1, j];
 				}
 			}
+            g.removeRow(lineNumber);
 			//anropa deleteLine i graphics
 		}
     }
