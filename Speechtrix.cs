@@ -42,6 +42,8 @@ namespace Speechtrix
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
             graphicsThread.Start();
 
+            Thread.Sleep(3000);
+
             Debug.Print("created graphics");
         }
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Drawing;
 using SdlDotNet.Graphics;
 using SdlDotNet.Core;
+using SdlDotNet.Input;
 using System.Diagnostics;
 
 
@@ -36,7 +37,11 @@ namespace Speechtrix
        static Color[,] currentColor;
        static Color[,] defaultColor;
 
-       Thread eventThread;
+       static int currentBlockX = 0;
+       static int currentBlockY = 0;
+       static bool[,] currentBlock = new bool [4,4];
+       static bool running;
+
 
         public Graphics()
         {
@@ -79,29 +84,64 @@ namespace Speechtrix
                 }
             }
 
+            blockSize = (int)Math.Min((SCREEN_WIDTH * 0.7) / blockX, (SCREEN_HEIGHT * 0.9) / blockY);
+            boardX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
+            boardY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
+
+            Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
+            Events.KeyboardDown += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
+
         }
+        /*
+         * Keyboard event handler for testing before we implement the voice controller
+         */
+        private static void KeyboardEventHandler(object sender, KeyboardEventArgs args)
+        {
+
+            switch (args.Key)
+            {
+                case Key.UpArrow:
+                    DrawScore(10);
+                    break;
+
+                case Key.DownArrow:
+                    DrawScore(2580);
+                    break;
+
+                case Key.LeftArrow:
+                    DrawBlock(0, 0, 2, 2, Color.FromArgb(0, 122, 0));
+                    break;
+
+                case Key.RightArrow:
+                    DrawBlock(0, 0, 5, 10, Color.FromArgb(0, 122, 0));
+                    break;
+
+                case Key.Escape:
+                    running = false;
+                    Events.QuitApplication();
+                    break;
+            }
+        }
+
+
         public static void Run()
         {
             screen = Video.SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, false, false, fullScreen, true);
 
             DrawBackground();
-            
+            Draw();
+
+            running = true;
             Events.Run();
             while (true)
             {
-                screen.Update();
             }
         }
         /**
-         * The main Drawing function, draws the whole game 
+         * The main Drawing function, draws the game-field
          */
         private static void Draw()
         {
-            
-            blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
-            boardX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
-            boardY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
-
               // draws out the current "game-field"
             for(int x = 0 ; x < blockX ; x++)
             {
@@ -110,6 +150,7 @@ namespace Speechtrix
                     
                     FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
                 }
+                screen.Update();
             }
 
             if (debug)
@@ -123,7 +164,6 @@ namespace Speechtrix
                 // draw and example "next block"
                 DrawNextBlock(0, Color.FromArgb(0, 122, 0));
             }
-            screen.Update();
         }
 
         /*
@@ -159,7 +199,7 @@ namespace Speechtrix
             int nextBlockSize = (int)(SCREEN_WIDTH * 0.05);
 
 
-            bool nextGrid = false;
+            bool nextGrid = true;
             if (nextGrid)
             {
                 
@@ -193,13 +233,28 @@ namespace Speechtrix
          */
         private static void DrawBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
+            
             bool[,] block = getBlock(blockID, rotation);
 
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
+                {
+                    if (block[x, y] && ((Xpos + x) > boardX || (Ypos + y) > boardY))
+                    {
+                        Events.QuitApplication();
+                        throw new FormatException();
+                    }
+                    if (currentBlock[x, y])
+                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX+x,currentBlockY+y]);
                     if (block[x, y])
-                        FillRect(boardX + (Xpos + x) * blockSize,boardY +  (Ypos + y) * blockSize, blockSize, col);
+                        FillRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
+                }
 
+            currentBlock = block;
+            currentBlockX = Xpos;
+            currentBlockY = Ypos;
+
+            screen.Update();
         }
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
@@ -276,7 +331,7 @@ namespace Speechtrix
             }
         }
         /*
-         * Draws out the score box with given score
+         * Draws out the score box with given score up to 8 digits
          */ 
         private static void DrawScore(int score)
         {
@@ -294,22 +349,22 @@ namespace Speechtrix
             FillRect(scoreX, scoreY, scoreWidth, scoreHeight, background);
             String scorestr = score.ToString();
 
-            int numberSize = (int)(scoreHeight * 0.8);
 
-            for (int i = 0; i < 8; i++)
+            int numberSize = (int)(scoreHeight * 0.8);
+            
+            for (int a = (8-scorestr.Length); a < 8; a++)
             {
-                if (i < scorestr.Length)
+                if ( a >= scorestr.Length)
                 {
-                    int tmp = Convert.ToInt32(scorestr.Substring(i,1));
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, fontColor, numberSize);
+                    int tmp = Convert.ToInt32(scorestr.Substring((a-(8-scorestr.Length)),1));
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * a * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, fontColor, numberSize);
                 }
                 else
                 {
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, fontColor, numberSize);
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * a * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, fontColor, numberSize);
                 }
-
-
             }
+            screen.Update();
         }
         /*
          * Draws a number using 7 lines as in a standard alarm clock
@@ -327,7 +382,7 @@ namespace Speechtrix
                                        { true, true, true, false, true, true, true }, // 0
                                        { false, false, true, false, false, true, false },// 1
                                        { true, false, true, true, true, false, true },// 2
-                                       { true, false, true, false, false, true, true },// 3
+                                       { true, false, true, true, false, true, true },// 3
                                        { false, true, true, true, false, true, false },// 4
                                        { true, true, false, true, false, true, true },// 5
                                        { true, true, false, true, true, true, true },// 6
@@ -445,6 +500,7 @@ namespace Speechtrix
                     screen.Draw(new Point(x, y), Color.FromArgb((int)colors[x].X,(int)colors[x].Y,(int)colors[x].Z));
                     backgroundCache[x, y] = Color.FromArgb((int)colors[x].X, (int)colors[x].Y, (int)colors[x].Z);
 		        }
+                screen.Update();
 	        }
             backgroundCached = true;
         }
@@ -483,6 +539,7 @@ namespace Speechtrix
 
         private static void ApplicationQuitEventHandler(object sender, QuitEventArgs args)
         {
+            running = false;
             Events.QuitApplication();
         }
         private static bool[,] getBlock(short ID, short rotation)
@@ -494,39 +551,51 @@ namespace Speechtrix
         // **** Public methods ****
         public void setTime(int hours, int minutes, int seconds)
         {
-            Debug.Print("reaching function");
+            if (!running)
+                return;
+            //Debug.Print("reaching function");
             DrawTimer(hours, minutes, seconds);
-            screen.Update();
         }
         public void setScore(int score)
         {
+            if (!running)
+                return;
             DrawScore(score);
             screen.Update();
         }
         public void setNext(short blockID, Color col)
         {
+            if (!running)
+                return;
             DrawNextBlock(blockID, col);
             screen.Update();
         }
         public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
+            if (!running)
+                return;
             Draw();
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
             screen.Update();
         }
         public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
+            if (!running)
+                return;
             lockBlockInPosition(blockID, rotation, Xpos, Ypos, col);
             Draw();
         }
         public void removeRow(int rownr)
         {
+            if (!running)
+                return;
             clearRow(rownr);
             Draw();
         }
         public void exit()
         {
-
+            running = false;
+            Events.QuitApplication();
         }
         public void setStressAnimation()
         {
