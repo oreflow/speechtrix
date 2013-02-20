@@ -555,6 +555,7 @@ namespace Speechtrix
                 return;
             //Debug.Print("reaching function");
             DrawTimer(hours, minutes, seconds);
+            screen.Update();
         }
         public void setScore(int score)
         {
