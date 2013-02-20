@@ -223,7 +223,9 @@ namespace Speechtrix
                                     Math.Max(0,Math.Min((int)(col.R * styleRectMatrix[x-posX, y-posY]), 255)),
                                     Math.Max(0,Math.Min((int)(col.G * styleRectMatrix[x-posX, y-posY]), 255)),
                                     Math.Max(0,Math.Min((int)(col.B * styleRectMatrix[x-posX, y-posY]), 255))));
-            Debug.Print("Drawn StyleRect");
+            
+            if (debug)
+                Debug.Print("Drawn StyleRect");
         }
 
         /*

@@ -19,12 +19,16 @@ namespace Speechtrix
                 Color.FromArgb(12, 0, 247), Color.FromArgb(255, 240, 0), Color.FromArgb(122, 78, 156),
                 Color.FromArgb(45, 237, 120)};
 
+        short[][,] sizes = new short[2][,]
+        {
+            new short[7,4]{{2,3,2,3},{1,4,1,4},{2,2,2,2},{2,3,2,3},{2,3,2,3},{2,3,2,3},{2,3,2,3}},
+            new short[7,4]{{3,2,3,2},{4,1,4,1},{2,2,2,2},{3,2,3,2},{3,2,3,2},{3,2,3,2},{3,2,3,2}}
+        };
         bool newBlock;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
         int score;
-		int starttime; //set when starting a game
 		int linesToNextLevel; //lines needed to be removed until reaching next level
 		int startCol, startRow, endCol, endRow, height, width;
 		Graphics g;
@@ -83,68 +87,22 @@ namespace Speechtrix
         }
 
 
-        //change size when rotating
-        short blockXSize(bool[,] bl)
-        {
-            short count = 0;
-            short max = 0;
-            for (int j=0; j<4; j++)
-            {
-                count = 0;
-                for (int i=0; i<4; i++)
-                {
-                    if (bl[i,j]){
-                        count++;
-                    }
-                    else if (count>0 && bl[i,j])
-                    {
-                        if (count > max)
-                            max = count;
-                    }
-                }
-            }
-            return max;
-        }
-        //change size when rotating
-        short blockYSize(bool[,] bl)
-        {
-            short count = 0;
-            short max = 0;
-            for (int j = 0; j < 4; j++)
-            {
-                count = 0;
-                for (int i = 0; i < 4; i++)
-                {
-                    if (bl[j, i])
-                    {
-                        count++;
-                    }
-                    else if (count > 0 && bl[j, i])
-                    {
-                        if (count > max)
-                            max = count;
-                    }
-                }
-            }
-            return max;
-        }
-
 
 
 
         /*************************************************/
         void play()
         {
-            LogicBlock current = new LogicBlock();
-            LogicBlock next = new LogicBlock();
+            current = new LogicBlock();
+            next = new LogicBlock();
             
             next.nr = (short)rand.Next(0, 7);
             next.rot = (short)rand.Next(0, 4);
             next.blo = Blocks.getRotations(next.nr, next.rot);
-            next.bxs = blockXSize(next.blo);
-            next.bys = blockYSize(next.blo);
+            next.bxs = sizes[0][next.nr, next.rot];
+            next.bys = sizes[1][next.nr, next.rot];
             next.y = 0;
-            next.x = (short) (width / 2 - next.bxs / 2);
+            next.x = (short) ((width-next.bxs)/2);
 
             newBlock = true;
 
@@ -159,8 +117,8 @@ namespace Speechtrix
                     next.nr = (short)rand.Next(0, 7);
                     next.rot = (short)rand.Next(0, 4);
                     next.blo = Blocks.getRotations(next.nr, next.rot);
-                    next.bxs = blockXSize(next.blo);
-                    next.bys = blockYSize(next.blo);
+                    next.bxs = sizes[0][next.nr, next.rot];
+                    next.bys = sizes[1][next.nr, next.rot];
                     next.y = 0;
                     next.x = (short)(width / 2 - next.bxs / 2);
                     next.color = cola[next.nr];
@@ -170,7 +128,7 @@ namespace Speechtrix
                     Debug.Print("Sizes: " + current.x + " " + current.y);
                 }
 
-                if (true)
+                if (true) //ska vara checkRowBelow() här sen
                 {
                     //g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
                     newBlock = true;
@@ -205,7 +163,7 @@ namespace Speechtrix
 		{
 			speed = ms;
 		}
-        
+
         bool checkEnd() //när ett block inte får plats i gamefield
 		{
             bool end = false;
