@@ -43,15 +43,23 @@ namespace Speechtrix
        static bool running;
        static Speechtrix callBack;
 
+        static bool styleRectGenerated = false;
+        static int styleRectGeneratedSize = 0;
+        static double[,] styleRectMatrix;
 
-        public Graphics()
+        static bool styleNextRectGenerated = false;
+        static int styleNextRectGeneratedSize = 0;
+        static double[,] styleNextRectMatrix;
+
+
+        public Graphics(Speechtrix _callBack)
         {
-            new Graphics(10, 20);
+            new Graphics(10, 20, _callBack);
         }
         /*
          * Constructor taking the game-field size as arguments
          */
-        public Graphics(int Xsize, int Ysize, Speechtrix _callBack)
+        public Graphics(int Xsize, int Ysize, Speechtrix _callBack )
         {
             callBack = _callBack;
 
@@ -151,8 +159,11 @@ namespace Speechtrix
             {
                 for (int y = 0; y < blockY ; y++)
                 {
-                    
-                    FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
+                    if(currentColor[x,y] != gridColor1 && currentColor[x,y] != gridColor2)
+                        StyleRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x, y]);
+                    else
+                        FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
+
                 }
                 screen.Update();
             }
@@ -179,6 +190,77 @@ namespace Speechtrix
                 for(int y = posY; y<(posY+size);y++)
                     screen.Draw(new Point(x, y), col);
         }
+
+        /*
+         * Draw a stylish square of size <size> at position posX, posY
+         */
+        private static void StyleRect(int posX, int posY, int size, Color col)
+        {
+            if(!styleRectGenerated || styleRectGeneratedSize != size)
+            {
+                styleRectMatrix = new double [size,size];
+
+            Point middle = new Point(size / 2, size / 2);
+            double maxDistance = Math.Sqrt(Math.Pow(middle.X, 2.0) + Math.Pow(middle.Y, 2.0));
+            double intensity = 0.3;
+            Debug.Print("before calc");
+            for (int x = 0; x < size; x++)
+                for (int y = 0; y < + size; y++)
+                {
+                    double distance = Math.Sqrt(Math.Pow(x - middle.X, 2.0) + Math.Pow(y - middle.Y, 2.0));
+                    //styleRectMatrix[x, y] = 1 + intensity * distance / maxDistance; // lighter edges
+                    styleRectMatrix[x, y] = 1 - intensity * distance / maxDistance; // darker edges
+                }
+            Debug.Print("after calc");
+            styleRectGenerated = true;
+            styleRectGeneratedSize = size;
+            }
+
+
+            for (int x = posX; x < (posX + size); x++)
+                for (int y = posY; y < (posY + size); y++)
+                    screen.Draw(new Point(x, y), Color.FromArgb(
+                                    Math.Max(0,Math.Min((int)(col.R * styleRectMatrix[x-posX, y-posY]), 255)),
+                                    Math.Max(0,Math.Min((int)(col.G * styleRectMatrix[x-posX, y-posY]), 255)),
+                                    Math.Max(0,Math.Min((int)(col.B * styleRectMatrix[x-posX, y-posY]), 255))));
+            Debug.Print("Drawn StyleRect");
+        }
+
+        /*
+         * Draw a stylish square of size <size> at position posX, posY
+         */
+        private static void StyleNextRect(int posX, int posY, int size, Color col)
+        {
+            if (!styleNextRectGenerated || styleNextRectGeneratedSize != size)
+            {
+                styleNextRectMatrix = new double[size, size];
+
+                Point middle = new Point(size / 2, size / 2);
+                double maxDistance = Math.Sqrt(Math.Pow(middle.X, 2.0) + Math.Pow(middle.Y, 2.0));
+                double intensity = 0.3;
+                Debug.Print("before calc");
+                for (int x = 0; x < size; x++)
+                    for (int y = 0; y < +size; y++)
+                    {
+                        double distance = Math.Sqrt(Math.Pow(x - middle.X, 2.0) + Math.Pow(y - middle.Y, 2.0));
+                        //styleNextRectMatrix[x, y] = 1 - intensity * distance / maxDistance; // lighter Edges
+                        styleNextRectMatrix[x, y] = 1 - intensity * distance / maxDistance; // darker edges
+                    }
+                Debug.Print("after calc");
+                styleNextRectGenerated = true;
+                styleNextRectGeneratedSize = size;
+            }
+
+
+            for (int x = posX; x < (posX + size); x++)
+                for (int y = posY; y < (posY + size); y++)
+                    screen.Draw(new Point(x, y), Color.FromArgb(
+                                    Math.Max(0, Math.Min((int)(col.R * styleNextRectMatrix[x - posX, y - posY]), 255)),
+                                    Math.Max(0, Math.Min((int)(col.G * styleNextRectMatrix[x - posX, y - posY]), 255)),
+                                    Math.Max(0, Math.Min((int)(col.B * styleNextRectMatrix[x - posX, y - posY]), 255))));
+
+        }
+
         /*
          * Draw a rectangle of size <sizeX, sizeY> at position posX, posY
          */
@@ -227,7 +309,7 @@ namespace Speechtrix
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                     if(block[x,y])
-                        FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
+                        StyleNextRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
 
 
 
@@ -249,9 +331,9 @@ namespace Speechtrix
                         throw new FormatException();
                     }
                     if (currentBlock[x, y])
-                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX+x,currentBlockY+y]);
+                        StyleRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX+x,currentBlockY+y]);
                     if (block[x, y])
-                        FillRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
+                        StyleRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
                 }
 
             currentBlock = block;
@@ -343,7 +425,7 @@ namespace Speechtrix
             Color fontColor = Color.FromArgb(255, 255, 255);
 
             if(score < 0 || score > 99999999)
-                score = 0;
+                score = 1337;
 
             int scoreWidth = (int) (SCREEN_WIDTH * 0.2);
             int scoreHeight = (int) (scoreWidth/4.5);
@@ -356,16 +438,16 @@ namespace Speechtrix
 
             int numberSize = (int)(scoreHeight * 0.8);
             
-            for (int a = (8-scorestr.Length); a < 8; a++)
+            for (int i = 0; i < 8; i++)
             {
-                if ( a >= scorestr.Length)
+                if ( i < scorestr.Length)
                 {
-                    int tmp = Convert.ToInt32(scorestr.Substring((a-(8-scorestr.Length)),1));
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * a * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, fontColor, numberSize);
+                    int tmp = Convert.ToInt32(scorestr.Substring(i,1));
+                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), tmp, fontColor, numberSize);
                 }
                 else
                 {
-                    DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * a * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, fontColor, numberSize);
+                    //DrawNumber((int)(scoreX + 0.1 * scoreHeight + numberSize / 2 * i * 1.4), (int)(scoreY + 0.1 * scoreHeight), 0, fontColor, numberSize);
                 }
             }
             screen.Update();
@@ -537,6 +619,7 @@ namespace Speechtrix
                     }
                     currentColor[x, y] = currentColor[x, y - 1];
                 }
+            screen.Update();
             
         }
 
