@@ -3,23 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Drawing;
 using SdlDotNet.Graphics;
 using SdlDotNet.Core;
+using System.Diagnostics;
 
 
 namespace Speechtrix
 {
-    class Graphics
+    public class Graphics
     {
-         private static Surface screen;
-        static bool fullScreen = false;
+        static bool debug = false;
+        private static Surface screen;
+        static bool fullScreen = true;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
         static int blockX;
         static int blockSize;
-        static bool debug = true;
+        
         static Color gridColor1;
         static Color gridColor2;
         static int boardY;
@@ -32,6 +35,8 @@ namespace Speechtrix
        static bool[,] tetriBoard;
        static Color[,] currentColor;
        static Color[,] defaultColor;
+
+       Thread eventThread;
 
         public Graphics()
         {
@@ -74,20 +79,24 @@ namespace Speechtrix
                 }
             }
 
-
+        }
+        public static void Run()
+        {
             screen = Video.SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, false, false, fullScreen, true);
-            Draw();
 
-
-            Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
+            DrawBackground();
+            
             Events.Run();
+            while (true)
+            {
+                screen.Update();
+            }
         }
         /**
          * The main Drawing function, draws the whole game 
          */
         private static void Draw()
         {
-            DrawBackground();
             
             blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
             boardX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
@@ -483,12 +492,9 @@ namespace Speechtrix
         }
 
         // **** Public methods ****
-        public void setTime(String time)
-        {
-            
-        }
         public void setTime(int hours, int minutes, int seconds)
         {
+            Debug.Print("reaching function");
             DrawTimer(hours, minutes, seconds);
             screen.Update();
         }

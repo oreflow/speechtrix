@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
+using System.Diagnostics;
 
 
 namespace Speechtrix
@@ -15,14 +17,17 @@ namespace Speechtrix
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         float speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
-        long score;
+        int score;
 		int starttime; //set when starting a game
 		int linesToNextLevel; //lines needed to be removed until reaching next level
 		int startCol, startRow, endCol, endRow, height, width;
 		Graphics g;
+        Thread tt;
+        Thread graphicsThread;
 
         public Speechtrix()
         {
+            
             gamefield = new bool[maxSizeRow,maxSizeCol];
             speed = 500;
             level = 1;
@@ -32,7 +37,12 @@ namespace Speechtrix
 			startRow = 0; startCol = 0;
 			height = 20; width = 10;
 			endCol = height; endRow = width;
-			g = new Graphics(width,height);
+            Debug.Print("creating speechtrix");
+            g = new Graphics(width, height);
+			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
+            graphicsThread.Start();
+
+            Debug.Print("created graphics");
         }
 
         public static void Main(string[] args)
@@ -41,7 +51,10 @@ namespace Speechtrix
 	//		if (Console.Read() == "y")
 		//	{
 				Speechtrix sp = new Speechtrix();
+                
 				sp.newGame();
+
+                
 		//	}
         }
 
@@ -61,10 +74,15 @@ namespace Speechtrix
 			for (int i=startRow; i<endRow; i++)
 				for (int j=startCol; j<endCol; j++)
 					gamefield[i,j] = false;
+
 			speed = 500;
             level = 1;
             score = 0;
 			linesToNextLevel = nextLevelLines;
+
+            TimerThread timer = new TimerThread(ref g);
+            tt = new Thread(new ThreadStart(timer.Run));
+            tt.Start();
 			//starttime = nu;
 		}
         void checkEnd() //när ett block inte får plats i gamefield
@@ -73,6 +91,7 @@ namespace Speechtrix
 		}
         void endGame() //när spelet tar slut
 		{
+            tt.Abort();
 			//show menu,highscore
 		}
         void updateScore(int lines) //hur många lines som tagit bort
@@ -82,7 +101,7 @@ namespace Speechtrix
 				linesToNextLevel += nextLevelLines;
 
 			score += level*10*lines;
-	//		g.DrawScore(score);
+            g.setScore(score);
 		}
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
 		{
@@ -112,5 +131,42 @@ namespace Speechtrix
 			}
 			//anropa deleteLine i graphics
 		}
+    }
+    class TimerThread
+    {
+        Graphics g;
+        int hours;
+        int minutes;
+        int seconds;
+
+        public TimerThread(ref Graphics _g)
+        {
+
+            Debug.Print("creating TimerThread");
+            g = _g;
+            hours = 0;
+            minutes = 0;
+            seconds = 0;
+        }
+        public void Run()
+        {
+            while (true)
+            {
+                Thread.Sleep(1000);
+                seconds++;
+                if (seconds == 60)
+                {
+                    minutes++;
+                    seconds = 0;
+                }
+                if (minutes == 60)
+                {
+                    hours++;
+                    minutes = 0;
+                }
+                g.setTime(hours, minutes, seconds);
+            }
+        }
+
     }
 }
