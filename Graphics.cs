@@ -15,7 +15,7 @@ namespace Speechtrix
 {
     public class Graphics
     {
-        static bool debug = true;
+        static bool debug = false;
         private static Surface screen;
         static bool fullScreen = true;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
@@ -159,8 +159,11 @@ namespace Speechtrix
             {
                 for (int y = 0; y < blockY ; y++)
                 {
-                    
-                    FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
+                    if(currentColor[x,y] != gridColor1 && currentColor[x,y] != gridColor2)
+                        StyleRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x, y]);
+                    else
+                        FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
+
                 }
                 screen.Update();
             }
