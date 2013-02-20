@@ -17,7 +17,7 @@ namespace Speechtrix
         long score;
 		int starttime; //set when starting a game
 		int linesToNextLevel; //lines needed to be removed until reaching next level
-		int startCol, startRow, endCol, endRow, breadth, width;
+		int startCol, startRow, endCol, endRow, height, width;
 
         public Speechtrix()
         {
@@ -28,10 +28,11 @@ namespace Speechtrix
 			linesToNextLevel = 30;
 			//starttime = nu;
 			startRow = 0; startCol = 0;
-			breadth = 16; width = 40;
-			endCol = breadth; endRow = width;
-			Graphics g = new Graphics(breadth,width);
+			height = 32; width = 16;
+			endCol = height; endRow = width;
+			Graphics g = new Graphics(width,height);
         }
+
         public static void Main(string[] args)
         {
 			new Speechtrix();
