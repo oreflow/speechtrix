@@ -24,7 +24,6 @@ namespace Speechtrix
         static Color gridColor2;
         static int boardY;
         static int boardX;
-		static Block b;
 
         static bool backgroundCached = false; 
         static Color[,] backgroundCache = new Color[SCREEN_WIDTH, SCREEN_HEIGHT];
@@ -41,7 +40,6 @@ namespace Speechtrix
 
         public Graphics(int Xsize, int Ysize)
         {
-			b = new Block(0);
             blockY = Ysize;
             blockX = Xsize;
 
@@ -88,21 +86,21 @@ namespace Speechtrix
         private static void Draw()
         {
             DrawBackground();
+            
             blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
+            boardX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
+            boardY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
 
-              int startX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
-              boardX = startX;
-              int startY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
-              boardY = startY;
-
+              // draws out the "game-field"
             for(int x = 0 ; x < blockX ; x++)
             {
                 for (int y = 0; y < blockY ; y++)
                 {
-                    // draws out the "game-field"
-                    FillRect(startX + x * blockSize, startY + y * blockSize, blockSize, currentColor[x,y]);
+                    
+                    FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
                 }
             }
+
             if (debug)
             {
                 // Draw an example timer
@@ -171,18 +169,10 @@ namespace Speechtrix
             // Draw the block on the GRID
          
 		   bool [,] block = getBlock(blockID, 0);
-			
-			
-			
-
             for (int x = 0; x < 4; x++)
-            {
                 for (int y = 0; y < 4; y++)
-                {
                     if(block[x,y])
                         FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
-                }
-            }
 
 
 
@@ -193,18 +183,14 @@ namespace Speechtrix
             bool[,] block = getBlock(blockID, rotation);
 
             for (int x = 0; x < 4; x++)
-            {
                 for (int y = 0; y < 4; y++)
-                {
                     if (block[x, y])
-                        FillRect(boardX + x * blockSize,boardY +  y * blockSize, blockSize, col);
-                }
-            }
+                        FillRect(boardX + (Xpos + x) * blockSize,boardY +  (Ypos + y) * blockSize, blockSize, col);
 
         }
 
 
-        private static void lockBlockInPosition(short blockID, int Xpos, int Ypos, Color col)
+        private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
             bool[,] block = getBlock(blockID, rotation);
             for (int x = 0; x < 4; x++)
@@ -456,7 +442,7 @@ namespace Speechtrix
         }
         private static bool[,] getBlock(short ID, short rotation)
         {
-            Block b = new Block();
+            Block b = new Block(0);
             b.setId(ID);
             bool[,] block = (b.getRot())[rotation];
             return block;
@@ -481,15 +467,18 @@ namespace Speechtrix
         }
         public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
+            Draw();
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
         }
-        public void lockBlock(short blockID, int Xpos, int Ypos, Color col)
+        public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
-            lockBlockInPosition(blockID, Xpos, Ypos, col);
+            lockBlockInPosition(blockID, rotation, Xpos, Ypos, col);
+            Draw();
         }
         public void removeRow(int rownr)
         {
-
+            clearRow(rownr);
+            Draw();
         }
         public void exit()
         {
