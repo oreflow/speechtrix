@@ -13,7 +13,7 @@ namespace Speechtrix
     class Graphics
     {
          private static Surface screen;
-        static bool fullScreen = true;
+        static bool fullScreen = false;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
@@ -22,6 +22,7 @@ namespace Speechtrix
         static bool debug = true;
         static Color gridColor1;
         static Color gridColor2;
+		static Block b;
 
         static bool backgroundCached = false; 
         static Color[,] backgroundCache = new Color[SCREEN_WIDTH, SCREEN_HEIGHT];
@@ -67,6 +68,7 @@ namespace Speechtrix
 
         public Graphics(int Xsize, int Ysize)
         {
+			b = new Block(0);
             blockY = Ysize;
             blockX = Xsize;
 
@@ -170,7 +172,11 @@ namespace Speechtrix
 
             // Draw the block on the GRID
             //TODO replace with getter for a block, rotation index 0
-            bool [,] block = {{true,true,false,false},{true,false,false,false},{true,false,false,false},{false,false,false,false}};
+         
+		//   bool [,] block = {{true,true,false,false},{true,false,false,false},{true,false,false,false},{false,false,false,false}};
+			
+			
+			b.setId(blockID); bool[,] block = (b.getRot())[3]; //såhär kan du sätta id (till blockID) och hämta rotation (index 3) 
 
             for (int x = 0; x < 4; x++)
             {
