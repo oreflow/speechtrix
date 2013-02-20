@@ -28,7 +28,8 @@ namespace Speechtrix
 
 
        static bool[,] tetriBoard;
-       static Color[,] currentColor; 
+       static Color[,] currentColor;
+       static Color[,] defaultColor;
 
         public Graphics()
         {
