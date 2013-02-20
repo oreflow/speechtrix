@@ -176,7 +176,8 @@ namespace Speechtrix
 		//   bool [,] block = {{true,true,false,false},{true,false,false,false},{true,false,false,false},{false,false,false,false}};
 			
 			
-			b.setId(blockID); bool[,] block = (b.getRot())[3]; //såhär kan du sätta id (till blockID) och hämta rotation (index 3) 
+		//	b.setId(blockID); bool[,] block = (b.getRot())[3]; //såhär kan du sätta id (till blockID) och hämta rotation (index 3)
+
 
             for (int x = 0; x < 4; x++)
             {
