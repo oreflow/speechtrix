@@ -312,7 +312,7 @@ namespace Speechtrix
                         StyleNextRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
 
 
-
+            screen.Update();
         }
         /*
          * Draws a given block on the game board, at position Xpos, Ypos, Color col
