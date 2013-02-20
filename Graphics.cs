@@ -22,6 +22,8 @@ namespace Speechtrix
         static bool debug = true;
         static Color gridColor1;
         static Color gridColor2;
+        static int boardY;
+        static int boardX;
 		static Block b;
 
         static bool backgroundCached = false; 
@@ -34,37 +36,7 @@ namespace Speechtrix
 
         public Graphics()
         {
-            fullScreen = true;
-            blockY = 15;
-            blockX = 10;
-            tetriBoard = new bool[blockX, blockY];
-            currentColor = new Color[blockX, blockY]; 
-
-
-            bool swit = false;
-            for(int i = 0; i < blockX; i++)
-            {
-                if (blockY % 2 == 0)
-                    swit = !swit;
-                for(int y = 0; y < blockY; y++)
-                {
-                    if (swit)
-                        currentColor[i, y] = Color.FromArgb(0, 0, 0);
-                    else
-                        currentColor[i, y] = Color.FromArgb(255, 255, 255);
-                    swit = !swit;
-                }
-            }
-
-            
-            screen = Video.SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, false, false, fullScreen, true);
-
-            
-            Draw();
-
-            
-            Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
-            Events.Run();
+            new Graphics(10, 20);
         }
 
         public Graphics(int Xsize, int Ysize)
@@ -75,10 +47,12 @@ namespace Speechtrix
 
             tetriBoard = new bool[blockX, blockY];
             currentColor = new Color[blockX, blockY];
+            defaultColor = new Color[blockX, blockY];
 
             gridColor1 = Color.FromArgb(100,100,100);
-            gridColor2 = Color.FromArgb(255, 255, 255);
+            gridColor2 = Color.FromArgb(155, 155, 155);
 
+            // adding default colors to currentColor and to defaultColor
             bool swit = false;
             for (int i = 0; i < blockX; i++)
             {
@@ -87,73 +61,96 @@ namespace Speechtrix
                 for (int y = 0; y < blockY; y++)
                 {
                     if (swit)
+                    {
                         currentColor[i, y] = gridColor1;
+                        defaultColor[i, y] = gridColor1;
+                    }
                     else
+                    {
                         currentColor[i, y] = gridColor2;
+                        defaultColor[i, y] = gridColor2;
+                    }
                     swit = !swit;
                 }
             }
 
 
             screen = Video.SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, false, false, fullScreen, true);
-
-
             Draw();
 
 
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Run();
         }
-
+        /**
+         * The main Drawing function, draws the whole game 
+         */
         private static void Draw()
         {
             DrawBackground();
             blockSize = (int) Math.Min((SCREEN_WIDTH*0.7)/blockX, (SCREEN_HEIGHT*0.9)/blockY);
 
               int startX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
+              boardX = startX;
               int startY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
+              boardY = startY;
 
             for(int x = 0 ; x < blockX ; x++)
             {
                 for (int y = 0; y < blockY ; y++)
                 {
+                    // draws out the "game-field"
                     FillRect(startX + x * blockSize, startY + y * blockSize, blockSize, currentColor[x,y]);
                 }
             }
             if (debug)
             {
+                // Draw an example timer
                 DrawTimer(01, 06, 45);
+                // draw an example score
                 DrawScore(0);
-                DrawBlock(0, 5, 5, Color.FromArgb(0, 122, 0));
+                // draw an example block 
+                DrawBlock(0, 0, 5, 5, Color.FromArgb(0, 122, 0));
+                // draw and example "next block"
                 DrawNextBlock(0, Color.FromArgb(0, 122, 0));
             }
             screen.Update();
         }
 
+        /*
+         * Draw a square of size <size> at position posX, posY
+         */
         private static void FillRect(int posX, int posY, int size, Color col)
         {
             for(int x = posX; x<(posX+size);x++)
                 for(int y = posY; y<(posY+size);y++)
                     screen.Draw(new Point(x, y), col);
         }
+        /*
+         * Draw a rectangle of size <sizeX, sizeY> at position posX, posY
+         */
         private static void FillRect(int posX, int posY, int sizeX,int sizeY, Color col)
         {
             for (int x = posX; x < (posX + sizeX); x++)
                 for (int y = posY; y < (posY + sizeY); y++)
                     screen.Draw(new Point(x, y), col);
         }
-
+        /*
+         * Draws out the given block as "next-block"
+         */
         private static void DrawNextBlock(short blockID, Color col)
         {
             
             // Draw "next" GRID
-            bool nextGrid = false;
+            
 
             int startX = (int)(SCREEN_WIDTH * 0.75);
             int startY = (int)(SCREEN_HEIGHT * 0.55);
             bool swit = false;
             int nextBlockSize = (int)(SCREEN_WIDTH * 0.05);
 
+
+            bool nextGrid = false;
             if (nextGrid)
             {
                 
@@ -172,12 +169,11 @@ namespace Speechtrix
             }
 
             // Draw the block on the GRID
-            //TODO replace with getter for a block, rotation index 0
          
-		//   bool [,] block = {{true,true,false,false},{true,false,false,false},{true,false,false,false},{false,false,false,false}};
+		   bool [,] block = getBlock(blockID, 0);
 			
 			
-			b.setId(blockID); bool[,] block = (b.getRot())[3]; //såhär kan du sätta id (till blockID) och hämta rotation (index 3) 
+			
 
             for (int x = 0; x < 4; x++)
             {
@@ -192,11 +188,35 @@ namespace Speechtrix
 
         }
 
-        private static void DrawBlock(short blockID, int Xpos, int Ypos, Color col)
+        private static void DrawBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
+            bool[,] block = getBlock(blockID, rotation);
+
+            for (int x = 0; x < 4; x++)
+            {
+                for (int y = 0; y < 4; y++)
+                {
+                    if (block[x, y])
+                        FillRect(boardX + x * blockSize,boardY +  y * blockSize, blockSize, col);
+                }
+            }
 
         }
 
+
+        private static void lockBlockInPosition(short blockID, int Xpos, int Ypos, Color col)
+        {
+            bool[,] block = getBlock(blockID, rotation);
+            for (int x = 0; x < 4; x++)
+            {
+                for (int y = 0; y < 4; y++)
+                {
+                    if (block[x, y])
+                        currentColor[x,y] = col;
+                }
+            }
+
+        }
         private static void DrawTimer(int hour, int minute, int second)
         {
             Color background = Color.FromArgb(255, 102, 0);
@@ -434,6 +454,13 @@ namespace Speechtrix
         {
             Events.QuitApplication();
         }
+        private static bool[,] getBlock(short ID, short rotation)
+        {
+            Block b = new Block();
+            b.setId(ID);
+            bool[,] block = (b.getRot())[rotation];
+            return block;
+        }
 
         // **** Public methods ****
         public void setTime(String time)
@@ -452,9 +479,13 @@ namespace Speechtrix
         {
             DrawNextBlock(blockID, col);
         }
-        public void setBlock(short blockID, int Xpos, int Ypos, Color col)
+        public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
-            DrawBlock(blockID, Xpos, Ypos, col);
+            DrawBlock(blockID, rotation, Xpos, Ypos, col);
+        }
+        public void lockBlock(short blockID, int Xpos, int Ypos, Color col)
+        {
+            lockBlockInPosition(blockID, Xpos, Ypos, col);
         }
         public void removeRow(int rownr)
         {
