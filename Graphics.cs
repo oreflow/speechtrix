@@ -37,7 +37,9 @@ namespace Speechtrix
         {
             new Graphics(10, 20);
         }
-
+        /*
+         * Constructor taking the game-field size as arguments
+         */
         public Graphics(int Xsize, int Ysize)
         {
             blockY = Ysize;
@@ -91,7 +93,7 @@ namespace Speechtrix
             boardX = (int)(SCREEN_WIDTH * 0.35) - (blockX * blockSize / 2);
             boardY = (int)(SCREEN_HEIGHT * 0.5) - (blockY * blockSize / 2);
 
-              // draws out the "game-field"
+              // draws out the current "game-field"
             for(int x = 0 ; x < blockX ; x++)
             {
                 for (int y = 0; y < blockY ; y++)
@@ -106,9 +108,9 @@ namespace Speechtrix
                 // Draw an example timer
                 DrawTimer(01, 06, 45);
                 // draw an example score
-                DrawScore(0);
+                DrawScore(250800);
                 // draw an example block 
-                DrawBlock(0, 0, 5, 5, Color.FromArgb(0, 122, 0));
+                DrawBlock(0, 0, 2, 2, Color.FromArgb(0, 122, 0));
                 // draw and example "next block"
                 DrawNextBlock(0, Color.FromArgb(0, 122, 0));
             }
@@ -177,7 +179,9 @@ namespace Speechtrix
 
 
         }
-
+        /*
+         * Draws a given block on the game board, at position Xpos, Ypos, Color col
+         */
         private static void DrawBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
             bool[,] block = getBlock(blockID, rotation);
@@ -188,8 +192,9 @@ namespace Speechtrix
                         FillRect(boardX + (Xpos + x) * blockSize,boardY +  (Ypos + y) * blockSize, blockSize, col);
 
         }
-
-
+        /*
+         * Locks a block to its position so that it will be drawn out as a landed unmovable block
+         */
         private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
             bool[,] block = getBlock(blockID, rotation);
@@ -203,6 +208,9 @@ namespace Speechtrix
             }
 
         }
+        /*
+         * Draws out the timer box with given time
+         */ 
         private static void DrawTimer(int hour, int minute, int second)
         {
             Color background = Color.FromArgb(255, 102, 0);
@@ -258,7 +266,9 @@ namespace Speechtrix
                 DrawNumber((int)(timerX + 0.1 * timerHeight + numberSize / 2 * 1 * 1.4 + numberSize * 3), (int)(timerY + 0.1 * timerHeight), Convert.ToInt32(second.ToString().Substring(0, 1)), fontColor, numberSize);
             }
         }
-
+        /*
+         * Draws out the score box with given score
+         */ 
         private static void DrawScore(int score)
         {
             Color background = Color.FromArgb(255, 102, 0);
@@ -292,7 +302,11 @@ namespace Speechtrix
 
             }
         }
-
+        /*
+         * Draws a number using 7 lines as in a standard alarm clock
+         * at position posX, posY, with height = size and width = height/2
+         * argument nr defines which number 0 - 9 is being drawn
+         */ 
         private static void DrawNumber(int posX, int posY, int nr, Color col, int size)
         {
             if (nr > 9 || nr < 0)
@@ -391,7 +405,9 @@ namespace Speechtrix
             }
 
         }
-
+        /*
+         * Draws the background color shading, also caches the background in case it will be redrawn
+         */
         private static void DrawBackground()
         {
             if(backgroundCached)
@@ -423,6 +439,9 @@ namespace Speechtrix
 	        }
             backgroundCached = true;
         }
+        /*
+         * interpolates between two Vectors, returns the interpolation in varable result
+         */
         private static void Interpolate(Vector a, Vector b, ref Vector [] result)
         {
             	int size = result.Length;
@@ -434,6 +453,23 @@ namespace Speechtrix
 		            current += step;
 	            }
         }
+        /*
+         * Removes one of the "locked" rows from the board since the row has been filled. 
+         */
+        private static void clearRow(int rownr)
+        {
+            for (int x = 0; x < blockX; x++)
+                for (int y = rownr; y > 0; y--)
+                {
+                    if(currentColor[x,y-1] == gridColor1 || currentColor[x,y-1] == gridColor2)
+                    {
+                        currentColor[x, y] = defaultColor[x, y];
+                        break;
+                    }
+                    currentColor[x, y] = currentColor[x, y - 1];
+                }
+            
+        }
 
 
         private static void ApplicationQuitEventHandler(object sender, QuitEventArgs args)
@@ -442,9 +478,7 @@ namespace Speechtrix
         }
         private static bool[,] getBlock(short ID, short rotation)
         {
-            Block b = new Block(0);
-            b.setId(ID);
-            bool[,] block = (b.getRot())[rotation];
+            bool[,] block = Blocks.getRotations(ID, rotation);
             return block;
         }
 
@@ -456,19 +490,23 @@ namespace Speechtrix
         public void setTime(int hours, int minutes, int seconds)
         {
             DrawTimer(hours, minutes, seconds);
+            screen.Update();
         }
         public void setScore(int score)
         {
             DrawScore(score);
+            screen.Update();
         }
         public void setNext(short blockID, Color col)
         {
             DrawNextBlock(blockID, col);
+            screen.Update();
         }
         public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
             Draw();
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
+            screen.Update();
         }
         public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
