@@ -4,18 +4,24 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows;
 using System.Diagnostics;
+using System.Drawing;
 
 
 namespace Speechtrix
 {
-    class Speechtrix
+    public class Speechtrix
     {
         const int maxSizeRow = 32;
         const int maxSizeCol = 64;
 		const int nextLevelLines = 20;
+        Color[] cola = new Color[7]
+            {Color.FromArgb(226, 0, 127), Color.FromArgb(255, 0, 0), Color.FromArgb(0, 255, 0), 
+                Color.FromArgb(12, 0, 247), Color.FromArgb(255, 240, 0), Color.FromArgb(122, 78, 156),
+                Color.FromArgb(45, 237, 120)};
+
         
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
-        float speed; //hastighet för fallande block i ms(?)
+        int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
         int score;
 		int starttime; //set when starting a game
@@ -24,25 +30,29 @@ namespace Speechtrix
 		Graphics g;
         Thread tt;
         Thread graphicsThread;
+        Block current, next;
+        Random rand;
 
         public Speechtrix()
         {
-            
+            rand = new Random();
             gamefield = new bool[maxSizeRow,maxSizeCol];
-            speed = 500;
+            speed = 10;
             level = 1;
             score = 0;
 			linesToNextLevel = nextLevelLines;
-			//starttime = nu;
+            current = new Block((short) rand.Next(0,7));
+            next = new Block((short) rand.Next(0,7));
+
 			startRow = 0; startCol = 0;
 			height = 20; width = 10;
 			endCol = height; endRow = width;
             Debug.Print("creating speechtrix");
-            g = new Graphics(width, height);
+            g = new Graphics(width, height, this);
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
             graphicsThread.Start();
 
-            Thread.Sleep(3000);
+            Thread.Sleep(10000);
 
             Debug.Print("created graphics");
         }
@@ -55,10 +65,38 @@ namespace Speechtrix
 				Speechtrix sp = new Speechtrix();
                 
 				sp.newGame();
+                sp.play();
 
                 
 		//	}
         }
+
+
+
+
+        /*************************************************/
+        void play()
+        {
+            
+            for (short i=0; !checkEnd() && i<2000; i++)
+            {
+                short bs = (short) rand.Next(0, 7);
+                g.setBlock(bs, (short)rand.Next(0, 4), (short)rand.Next(0, width-4), (short)rand.Next(0, height-4), cola[bs]);
+
+
+
+
+
+
+
+                Thread.Sleep(speed);
+            }
+            endGame();
+        }
+        /*************************************************/
+
+
+
 
         void newLevel() //ändra level -> ändrar speed/poängsätt...
         {
@@ -67,7 +105,7 @@ namespace Speechtrix
 			if (speed > 100)
 				setSpeed(speed-nextLevelLines);
         }
-		void setSpeed(float ms) //sätter fallhastighet
+		void setSpeed(int ms) //sätter fallhastighet
 		{
 			speed = ms;
 		}
@@ -77,7 +115,10 @@ namespace Speechtrix
 				for (int j=startCol; j<endCol; j++)
 					gamefield[i,j] = false;
 
-			speed = 500;
+            current = new Block((short)rand.Next(0, 7));
+            next = new Block((short)rand.Next(0, 7));
+
+			speed = 10;
             level = 1;
             score = 0;
 			linesToNextLevel = nextLevelLines;
@@ -85,17 +126,30 @@ namespace Speechtrix
             TimerThread timer = new TimerThread(ref g);
             tt = new Thread(new ThreadStart(timer.Run));
             tt.Start();
-			//starttime = nu;
+            updateScore(2523);
 		}
-        void checkEnd() //när ett block inte får plats i gamefield
+        bool checkEnd() //när ett block inte får plats i gamefield
 		{
-			
+            bool end = false;
+
+
+
+            return end;
 		}
         void endGame() //när spelet tar slut
 		{
             tt.Abort();
-			//show menu,highscore
+            checkHighscore();
+            showMenu();
 		}
+        void checkHighscore()
+        {
+
+        }
+        void showMenu()
+        {
+
+        }
         void updateScore(int lines) //hur många lines som tagit bort
 		{
 			linesToNextLevel -= lines;
@@ -103,6 +157,7 @@ namespace Speechtrix
 				linesToNextLevel += nextLevelLines;
 
 			score += level*10*lines;
+            Debug.Print("POints:  " + score);
             g.setScore(score);
 		}
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
@@ -120,7 +175,6 @@ namespace Speechtrix
 				}
 			}
 			updateScore(deletedLines);
-
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
