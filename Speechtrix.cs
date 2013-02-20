@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Speechtrix
 {
-    class Speechtrix
+    public class Speechtrix
     {
         const int maxSizeRow = 32;
         const int maxSizeCol = 64;
@@ -38,11 +38,11 @@ namespace Speechtrix
 			height = 20; width = 10;
 			endCol = height; endRow = width;
             Debug.Print("creating speechtrix");
-            g = new Graphics(width, height);
+            g = new Graphics(width, height, this);
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
             graphicsThread.Start();
 
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
 
             Debug.Print("created graphics");
         }
