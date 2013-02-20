@@ -168,7 +168,7 @@ namespace Speechtrix
 
             // Draw the block on the GRID
          
-		   bool [,] block = getBlock(blockID, 0);
+		   bool [,] block = Blocks.getRotations(blockID, 0);
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                     if(block[x,y])
