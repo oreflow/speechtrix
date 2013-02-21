@@ -11,8 +11,8 @@ namespace Speechtrix
 {
     public class Speechtrix
     {
-        const int maxSizeRow = 32;
-        const int maxSizeCol = 64;
+        const int maxY = 32;
+        const int maxX = 64;
 		const int nextLevelLines = 20;
         Color[] cola = new Color[7]
             {Color.FromArgb(226, 0, 127), Color.FromArgb(255, 0, 0), Color.FromArgb(0, 255, 0), 
@@ -30,7 +30,7 @@ namespace Speechtrix
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
         int score;
 		int linesToNextLevel; //lines needed to be removed until reaching next level
-		int startCol, startRow, endCol, endRow, height, width;
+		int startX, startY, endX, endY, height, width;
 		Graphics g;
         Thread tt;
         Thread graphicsThread;
@@ -40,12 +40,12 @@ namespace Speechtrix
         public Speechtrix()
         {
             rand = new Random();
-            gamefield = new bool[maxSizeRow,maxSizeCol];
+            gamefield = new bool[maxX,maxY];
 			linesToNextLevel = nextLevelLines;
 
-			startRow = 0; startCol = 0;
+			startY = 0; startX = 0;
 			height = 20; width = 10;
-			endCol = height; endRow = width;
+			endY = height; endX = width;
             Debug.Print("creating speechtrix");
             g = new Graphics(width, height, this);
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
@@ -71,9 +71,9 @@ namespace Speechtrix
         }
         void newGame() //nollställer tid, score, level, tömmer matris gamefield
         {
-            for (int i = startRow; i < endRow; i++)
-                for (int j = startCol; j < endCol; j++)
-                    gamefield[i, j] = false;
+            for (int x = startX; x < endX; x++)
+                for (int y = startY; y < endY; y++)
+                    gamefield[x, y] = false;
 
             speed = 400;
             level = 1;
@@ -127,19 +127,12 @@ namespace Speechtrix
                     g.setBlock(current.nr,current.rot,current.x,current.y,current.color);
                     Debug.Print("Sizes: " + current.bxs + " " + current.bys);
                 }
+                g.setBlock(current.nr, current.rot, current.x, current.y, current.color); //paint
+                
+                if (checkRowBelow())
+                    lockBlock(current);
 
-                if (checkRowBelow()) //ska vara checkRowBelow() här sen
-                {
-                    
-               //     g.lockBlock(current.nr, current.rot, current.x, current.y, current.color, sizes);
-                    g.lockBlock(current);
-                    newBlock = true;
-                }
-                else
-                {
-                    current.y++; //falling
-                    g.setBlock(current.nr, current.rot, current.x, current.y, current.color); //paint
-                }
+                current.y++; //falling
 
                 Thread.Sleep(speed);
             }
@@ -147,19 +140,36 @@ namespace Speechtrix
         }
         /*************************************************/
 
+        void lockBlock(LogicBlock b)
+        {
+            for (int x = 0; x < b.bxs; x++)
+            { 
+                for (int y = 0; y < b.bys; y++)
+                {
+                    if (current.blo[x, y])
+                    {
+                        gamefield[current.x + x, current.y + y] = true;
+                    }
+                }
+            }
+            g.lockBlock(current);
+            newBlock = true;
+        }
+
 		int[][] getRealCoord()
 		{
 			int[][] co = new int[4][];
 			int count = 0;
-			for (int r=0; r < current.bys; r++)
+			for (int x=0; x < current.bxs; x++)
 			{
-				for (int c=0; c < current.bxs; c++)
+				for (int y=0; y < current.bys; y++)
 				{
-					if (current.blo[r,c])
+					if (current.blo[y,x])
 					{
-						co[count] = new int[2];
-						co[count][0] = r+current.x;
-						co[count][1] = c+current.y;
+						co[count] = new int[2]{
+						    x+current.x,
+						    y+current.y
+                        };
 						count++;
 					}
 				}
@@ -170,12 +180,12 @@ namespace Speechtrix
         bool checkRowBelow()
         {
 			Debug.Print("\ncheckrow");
-			int[][] coord = getRealCoord();
+            int[][] coord = new int[4][] { new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 } };
+            coord = getRealCoord();
 
 			for (int i = 0; i < 4; i++)
 			{
-				Debug.Print("x: " + coord[i][0] + ", y: " + coord[i][1]);
-				if (gamefield[coord[i][1]+1 , coord[i][0]] || coord[i][1]+1 >= height)
+                if (gamefield[coord[i][0], coord[i][1]+1] || coord[i][1]+1 >= height)
 				{
 					return true;
 				}
@@ -230,11 +240,11 @@ namespace Speechtrix
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
 		{
 			int deletedLines = 0;
-			for (int i=startRow; i<endRow; i++)
+			for (int i=startY; i<endY; i++)
 			{
-				int j = startCol;
-				for (; j<maxSizeCol && !gamefield[i,j]; j++) ; //as long as gamefield is all true on a row
-				if (j==maxSizeCol) //if whole row true
+				int j = startX;
+				for (; j<maxX && !gamefield[j,i]; j++) ; //as long as gamefield is all true on a row
+				if (j==maxX) //if whole row true
 				{
 					deletedLines++;
 					deleteLine(i);
@@ -245,11 +255,11 @@ namespace Speechtrix
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
-			for (int i = lineNumber; i > startRow + 1; i--)
+			for (int y = lineNumber; y > startY; y--)
 			{
-				for (int j = startCol; j < endCol; j++)
+				for (int x = startX; x < endX; x++)
 				{
-					gamefield[i, j] = gamefield[i - 1, j];
+                    gamefield[x, y] = gamefield[x, y - 1];
 				}
 			}
             g.removeRow(lineNumber);

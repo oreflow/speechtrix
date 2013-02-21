@@ -370,7 +370,7 @@ namespace Speechtrix
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
          */
-        private static void lockBlockInPosition(LogicBlock logblock)
+        private static void lockBlockInPosition(LogicBlock logblock) //låser bara x0,y0
         {
             int x = 0;
             int y = 0;
