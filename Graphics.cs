@@ -351,7 +351,7 @@ namespace Speechtrix
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
          */
-        private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
+        private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col, short[][,] sizes)
         {
             for (int x = 0; x < 4; x++)
             {
@@ -359,10 +359,39 @@ namespace Speechtrix
                 {
                     if (currentBlock[x, y])
                     {
-                        currentColor[x, y] = col;
-                        currentBlock[x, y] = false;
+                        currentColor[x+Xpos, y+Ypos] = col;
+                        currentBlock[x+Xpos, y+Ypos] = false;
                     }
                 }
+            }
+            currentBlockX = 0;
+            currentBlockY = 0;
+        }
+        /*
+         * Locks a block to its position so that it will be drawn out as a landed unmovable block
+         */
+        private static void lockBlockInPosition(LogicBlock logblock)
+        {
+            int x = 0;
+            int y = 0;
+            try
+            {
+                
+                for (; x < logblock.bxs; x++)
+                {
+                    for (; y < logblock.bys; y++)
+                    {
+                        if (logblock.blo[x, y])
+                        {
+                            Debug.Print(x + logblock.x + "  " + y + logblock.y);
+                            currentColor[x + logblock.x, y + logblock.y] = logblock.color;
+                            currentBlock[x + logblock.x, y + logblock.y] = false;
+                        }
+                    }
+                }
+            }    catch(IndexOutOfRangeException e)
+            {
+                Debug.Print((x+logblock.x) + "  " + (y+logblock.y));
             }
             currentBlockX = 0;
             currentBlockY = 0;
@@ -677,11 +706,18 @@ namespace Speechtrix
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
             screen.Update();
         }
-        public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
+        public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col, short[][,] sizes)
         {
             if (!running)
                 return;
-            lockBlockInPosition(blockID, rotation, Xpos, Ypos, col);
+            lockBlockInPosition(blockID, rotation, Xpos, Ypos, col, sizes);
+            Draw();
+        }
+        public void lockBlock(LogicBlock logblock)
+        {
+            if (!running)
+                return;
+            lockBlockInPosition(logblock);
             Draw();
         }
         public void removeRow(int rownr)

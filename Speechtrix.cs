@@ -119,18 +119,20 @@ namespace Speechtrix
                     next.blo = Blocks.getRotations(next.nr, next.rot);
                     next.bxs = sizes[0][next.nr, next.rot];
                     next.bys = sizes[1][next.nr, next.rot];
-                    next.y++;
+                    next.y = 0;
                     next.x = (short)(width / 2 - next.bxs / 2);
                     next.color = cola[next.nr];
                     
                     g.setNext(next.nr, next.rot, next.color);
                     g.setBlock(current.nr,current.rot,current.x,current.y,current.color);
-                    Debug.Print("Sizes: " + current.x + " " + current.y);
+                    Debug.Print("Sizes: " + current.bxs + " " + current.bys);
                 }
 
                 if (checkRowBelow()) //ska vara checkRowBelow() här sen
                 {
-                    g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
+                    
+               //     g.lockBlock(current.nr, current.rot, current.x, current.y, current.color, sizes);
+                    g.lockBlock(current);
                     newBlock = true;
                 }
                 else
@@ -306,17 +308,5 @@ namespace Speechtrix
             }
         }
 
-    }
-
-    class LogicBlock
-    {
-        public short nr, x, y, bxs, bys, rot;
-        public Color color;
-        public bool[,] blo = new bool[4,4];
-
-        public LogicBlock()
-        {
-            blo = new bool[4,4];
-        }      
     }
 }

@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Blocks.cs" />
+    <Compile Include="LogicBlock.cs" />
     <Compile Include="SpeechThread.cs" />
     <Compile Include="Graphics.cs" />
     <Compile Include="Speechtrix.cs" />
