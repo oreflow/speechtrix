@@ -339,8 +339,6 @@ namespace Speechtrix
                         Events.QuitApplication();
                         throw new FormatException();
                     }
-                    if (currentBlock[x, y])
-                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX+x,currentBlockY+y]);
                     if (block[x, y])
                         StyleRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
                 }
