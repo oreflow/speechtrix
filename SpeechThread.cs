@@ -20,7 +20,7 @@ namespace Speechtrix
         {
             while (true)
             {
-
+                break;
             }
 
         }

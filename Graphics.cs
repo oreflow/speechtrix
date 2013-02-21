@@ -597,7 +597,8 @@ namespace Speechtrix
                     screen.Draw(new Point(x, y), Color.FromArgb((int)colors[x].X,(int)colors[x].Y,(int)colors[x].Z));
                     backgroundCache[x, y] = Color.FromArgb((int)colors[x].X, (int)colors[x].Y, (int)colors[x].Z);
 		        }
-                screen.Update(); // comment this row to remove background animation
+                if(y % 5 == 0)
+                    screen.Update(); // comment this row to remove background animation
 	        }
             backgroundCached = true;
         }
