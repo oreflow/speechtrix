@@ -355,17 +355,22 @@ namespace Speechtrix
          */
         private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
-            bool[,] block = getBlock(blockID, rotation);
             for (int x = 0; x < 4; x++)
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    if (block[x, y])
-                        currentColor[x,y] = col;
+                    if (currentBlock[x, y])
+                    {
+                        currentColor[x, y] = col;
+                        currentBlock[x, y] = false;
+                    }
                 }
             }
-
+            currentBlockX = 0;
+            currentBlockY = 0;
         }
+        
+
         /*
          * Draws out the timer box with given time
          */ 
