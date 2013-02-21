@@ -119,7 +119,7 @@ namespace Speechtrix
                     next.blo = Blocks.getRotations(next.nr, next.rot);
                     next.bxs = sizes[0][next.nr, next.rot];
                     next.bys = sizes[1][next.nr, next.rot];
-                    next.y = 0;
+                    next.y++;
                     next.x = (short)(width / 2 - next.bxs / 2);
                     next.color = cola[next.nr];
                     

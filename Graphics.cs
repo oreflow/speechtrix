@@ -17,7 +17,7 @@ namespace Speechtrix
     {
         static bool debug = false;
         private static Surface screen;
-        static bool fullScreen = false;
+        static bool fullScreen = true;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
@@ -327,13 +327,18 @@ namespace Speechtrix
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                 {
+                    if (currentBlock[x, y])
+                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX + x, currentBlockY + y]);
+                }
+
+            for (int x = 0; x < 4; x++)
+                for (int y = 0; y < 4; y++)
+                {
                     if (block[x, y] && ((Xpos + x) > boardX || (Ypos + y) > boardY))
                     {
                         Events.QuitApplication();
                         throw new FormatException();
                     }
-                    if (currentBlock[x, y])
-                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX+x,currentBlockY+y]);
                     if (block[x, y])
                         StyleRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
                 }
@@ -342,24 +347,28 @@ namespace Speechtrix
             currentBlockX = Xpos;
             currentBlockY = Ypos;
 
-            screen.Update();
         }
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
          */
         private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
-            bool[,] block = getBlock(blockID, rotation);
             for (int x = 0; x < 4; x++)
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    if (block[Xpos+x, Ypos+y]) //switch order on y and x
-                        currentColor[Xpos+x,Ypos+y] = col; //Likewsie
+                    if (currentBlock[x, y])
+                    {
+                        currentColor[x, y] = col;
+                        currentBlock[x, y] = false;
+                    }
                 }
             }
-
+            currentBlockX = 0;
+            currentBlockY = 0;
         }
+        
+
         /*
          * Draws out the timer box with given time
          */ 
@@ -588,7 +597,8 @@ namespace Speechtrix
                     screen.Draw(new Point(x, y), Color.FromArgb((int)colors[x].X,(int)colors[x].Y,(int)colors[x].Z));
                     backgroundCache[x, y] = Color.FromArgb((int)colors[x].X, (int)colors[x].Y, (int)colors[x].Z);
 		        }
-                screen.Update(); // comment this row to remove background animation
+                if(y % 5 == 0)
+                    screen.Update(); // comment this row to remove background animation
 	        }
             backgroundCached = true;
         }
@@ -664,7 +674,6 @@ namespace Speechtrix
         {
             if (!running)
                 return;
-            Draw();
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
             screen.Update();
         }
