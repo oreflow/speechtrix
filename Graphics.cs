@@ -17,7 +17,7 @@ namespace Speechtrix
     {
         static bool debug = false;
         private static Surface screen;
-        static bool fullScreen = false;
+        static bool fullScreen = true;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
@@ -327,6 +327,13 @@ namespace Speechtrix
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                 {
+                    if (currentBlock[x, y])
+                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX + x, currentBlockY + y]);
+                }
+
+            for (int x = 0; x < 4; x++)
+                for (int y = 0; y < 4; y++)
+                {
                     if (block[x, y] && ((Xpos + x) > boardX || (Ypos + y) > boardY))
                     {
                         Events.QuitApplication();
@@ -342,7 +349,6 @@ namespace Speechtrix
             currentBlockX = Xpos;
             currentBlockY = Ypos;
 
-            screen.Update();
         }
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
@@ -664,7 +670,6 @@ namespace Speechtrix
         {
             if (!running)
                 return;
-            Draw();
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
             screen.Update();
         }
