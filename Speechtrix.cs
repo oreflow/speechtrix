@@ -75,7 +75,7 @@ namespace Speechtrix
                 for (int j = startCol; j < endCol; j++)
                     gamefield[i, j] = false;
 
-            speed = 1500;
+            speed = 400;
             level = 1;
             score = 0;
             linesToNextLevel = nextLevelLines;
@@ -128,9 +128,9 @@ namespace Speechtrix
                     Debug.Print("Sizes: " + current.x + " " + current.y);
                 }
 
-                if (true) //ska vara checkRowBelow() här sen
+                if (checkRowBelow()) //ska vara checkRowBelow() här sen
                 {
-                    //g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
+                    g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
                     newBlock = true;
                 }
                 else
@@ -145,10 +145,39 @@ namespace Speechtrix
         }
         /*************************************************/
 
+		int[][] getRealCoord()
+		{
+			int[][] co = new int[4][];
+			int count = 0;
+			for (int r=0; r < current.bys; r++)
+			{
+				for (int c=0; c < current.bxs; c++)
+				{
+					if (current.blo[r,c])
+					{
+						co[count] = new int[2];
+						co[count][0] = r+current.x;
+						co[count][1] = c+current.y;
+						count++;
+					}
+				}
+			}
+			return co;
+		}
 
         bool checkRowBelow()
         {
-            for (int i=0; i<width; i++) ;
+			Debug.Print("\ncheckrow");
+			int[][] coord = getRealCoord();
+
+			for (int i = 0; i < 4; i++)
+			{
+				Debug.Print("x: " + coord[i][0] + ", y: " + coord[i][1]);
+				if (gamefield[coord[i][1]+1 , coord[i][0]] || coord[i][1]+1 >= height)
+				{
+					return true;
+				}
+			}
             return false;
         }
 

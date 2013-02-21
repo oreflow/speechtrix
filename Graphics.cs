@@ -354,8 +354,8 @@ namespace Speechtrix
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    if (block[x, y])
-                        currentColor[x,y] = col;
+                    if (block[Xpos+x, Ypos+y]) //switch order on y and x
+                        currentColor[Xpos+x,Ypos+y] = col; //Likewsie
                 }
             }
 
