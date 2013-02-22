@@ -26,11 +26,12 @@ namespace Speechtrix
 		Graphics g;
         Thread tt;
         Thread graphicsThread;
-        LogicBlock current, next;
+        LogicBlock current, next, rotateCheck;
         Random rand;
 
         public Speechtrix()
         {
+            rotateCheck = new LogicBlock();
             rand = new Random();
             gamefield = new bool[maxX,maxY];
 			linesToNextLevel = nextLevelLines;
@@ -190,6 +191,7 @@ namespace Speechtrix
             return false;
         }
 
+
         void newLevel() //ändra level -> ändrar speed/poängsätt...
         {
             level++;
@@ -252,7 +254,7 @@ namespace Speechtrix
 					g.removeRow(i);
 				}
 			}
-			updateScore(deletedLines);
+			updateScore(deletedLines);  
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
@@ -276,13 +278,27 @@ namespace Speechtrix
         }
         bool canRotate()
         {
-            return true;
+            short newXsize = Blocks.sizes[0][current.nr, ((current.state+1) % 4)];
+            short newYsize = Blocks.sizes[1][current.nr, ((current.state+1) % 4)];
+
+            rotateCheck.nr = current.nr;
+            rotateCheck.state = (short)((current.state + 1) % 4);
+            for (int i = 0; i < rotateCheck.bxs; i++)
+                for (int j = 0; j < rotateCheck.bys; j++)
+                    if (rotateCheck.getState()[i, j] && gamefield[i + current.x, j + current.y])
+                        return false;
+
+            if (current.x + newXsize <= width)
+                return true;
+            else
+                return false;
         }
         public void keyUp()
         {
             if (canRotate())
             {
-                current.state = (short)((current.state++) % 4);
+                Debug.Print("rotate "+(current.state+1)%4);
+                current.state = (short) ((current.state+1) % 4);
                 g.setBlock(current);
             }
         }

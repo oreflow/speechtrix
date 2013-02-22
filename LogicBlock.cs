@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace Speechtrix
 {
@@ -25,6 +26,7 @@ namespace Speechtrix
         {
             set
             {
+                Debug.Print(state + " " + value);
                 _state = value;
                 bxs = Blocks.sizes[0][nr, _state];
                 bys = Blocks.sizes[1][nr, _state];
