@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Speechtrix
 {
-    class Block
+    public class Block
     {
-		private short id; //from 0-6
+		public short id { get; set; } //from 0-6
 		private bool[][,] rotations; //each 4 rotations for a block
 
         public Block(short pId)
