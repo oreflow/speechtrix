@@ -16,6 +16,7 @@ namespace Speechtrix
 		const int nextLevelLines = 20;
         
         bool newBlock;
+        bool gotonext = false;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
@@ -85,17 +86,16 @@ namespace Speechtrix
             current.bys = next.bys;
             current.x = next.x;
             current.y = next.y;
+            current.movable = next.movable;
             current.color = next.color;
         }
         void initiateNewNext()
         {
             next.nr = (short)rand.Next(0, 7);
             next.state = (short)rand.Next(0, 4);
-    //        next.bxs = sizes[0][next.nr, next.state];
-    //        next.bys = sizes[1][next.nr, next.state];
             next.y = 0;
             next.x = (short)(width / 2 - next.bxs / 2);
-    //        next.color = cola[next.nr];
+            next.movable = true;
         }
 
 
@@ -119,6 +119,7 @@ namespace Speechtrix
                     initiateNewNext();
                     g.setNext(next);
                     Debug.Print("Sizes: " + current.bxs + " " + current.bys);
+                    gotonext = false;
                 }
 
 				g.setBlock(current); //update falling block graphically
@@ -128,10 +129,11 @@ namespace Speechtrix
                     lockBlock();
                     checkFullLine();
                 }
-                else
+                else if (!gotonext)
+                {
                     current.y++; //falling
-
-                Thread.Sleep(speed);
+                    Thread.Sleep(speed);
+                }
             }
             endGame();
         }
@@ -139,26 +141,17 @@ namespace Speechtrix
 
         void lockBlock()
         {
+            current.movable = false;
             for (int x = 0; x < current.bxs; x++)
             { 
                 for (int y = 0; y < current.bys; y++)
                 {
-                    if (current.getRotation()[x, y])
+                    if (current.getState()[x, y])
                     {
                         gamefield[current.x + x, current.y + y] = true;
                     }
                 }
             }
-			/*for (int i = 0; i < height; i++)
-			{
-				for (int j = 0; j < width; j++)
-				{
-					if (gamefield[j, i])
-						Debug.Print(""+1);
-					else
-						Debug.Print(""+0);
-				}
-			}*/
             g.lockBlock(current, next);
             newBlock = true;
         }
@@ -171,7 +164,7 @@ namespace Speechtrix
 			{
 				for (int y=0; y < current.bys; y++)
 				{
-					if (current.getRotation()[x,y])
+					if (current.getState()[x,y])
 					{
 						co[count] = new int[2]{
 						    x+current.x,
@@ -186,8 +179,7 @@ namespace Speechtrix
 
         bool checkRowBelow()
         {
-			Debug.Print("\ncheckrow");
-            int[][] coord = new int[4][] { new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 } };
+            int[][] coord = new int[4][] {new int[2]{0,0},new int[2]{0,0},new int[2]{0,0},new int[2]{0,0}};
             coord = getRealCoord();
 
 			for (int i = 0; i < 4; i++) //gå igenom blockets 4 (x,y)-koordinater
@@ -247,13 +239,13 @@ namespace Speechtrix
             // ingen poäng med att kolla alla rader, man behöver bara current-blocks rader eftersom att det bara är de som kan ha blivit fulla
 			int deletedLines = 0;
             short minY = current.y;
-            short maxY = current.bys;
+            short maxY = (short) (current.y+current.bys);
 			//for (int i=startY; i<endY; i++)
             for (int i = minY; i < maxY; i++)
 			{
 				int j = startX;
-				for (; j<maxX && !gamefield[j,i]; j++) ; //as long as gamefield is all true on a row
-				if (j==maxX) //if whole row true
+				for (; j<width && gamefield[j,i]; j++) ; //as long as gamefield is all true on a row
+				if (j==width) //if whole row true
 				{
 					deletedLines++;
 					deleteLine(i);
@@ -273,30 +265,68 @@ namespace Speechtrix
 			}
             g.removeRow(lineNumber);
 		}
+
+        bool canGoLeft()
+        {
+            return true;
+        }
+        bool canGoRight()
+        {
+            return true;
+        }
+        bool canRotate()
+        {
+            return true;
+        }
         public void keyUp()
         {
-            current.state = (short)((current.state++) % 4);
-
-
+            if (canRotate())
+            {
+                current.state = (short)((current.state++) % 4);
+                g.setBlock(current);
+            }
         }
         public void keyDown()
         {
+            if (checkRowBelow())
+            {
+                lockBlock();
+                checkFullLine();
+                gotonext = true;
+            }
+            else
+            {
+                current.y++;
+                g.setBlock(current);
+            }
 
+            if (checkRowBelow())
+            {
+                lockBlock();
+                checkFullLine();
+                gotonext = true;
+            }
         }
         public void keyLeft()
         {
+            if (canGoLeft())
+            {
                 if (current.x > 0)
                 {
                     current.x--;
                     g.setBlock(current); // makes the graphics bug a bit
                 }
+            }
         }
         public void keyRight()
         {
-            if (current.x < width - current.bxs)
+            if (canGoRight())
             {
-                current.x++;
-                g.setBlock(current); // makes the graphics bug a bit
+                if (current.x < width - current.bxs)
+                {
+                    current.x++;
+                    g.setBlock(current); // makes the graphics bug a bit
+                }
             }
         }
     }
