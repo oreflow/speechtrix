@@ -11,8 +11,8 @@ namespace Speechtrix
 {
     public class Speechtrix
     {
-        const int maxSizeRow = 32;
-        const int maxSizeCol = 64;
+        const int maxY = 32;
+        const int maxX = 64;
 		const int nextLevelLines = 20;
         Color[] cola = new Color[7]
             {Color.FromArgb(226, 0, 127), Color.FromArgb(255, 0, 0), Color.FromArgb(0, 255, 0), 
@@ -30,7 +30,7 @@ namespace Speechtrix
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
         int score;
 		int linesToNextLevel; //lines needed to be removed until reaching next level
-		int startCol, startRow, endCol, endRow, height, width;
+		int startX, startY, endX, endY, height, width;
 		Graphics g;
         Thread tt;
         Thread graphicsThread;
@@ -40,12 +40,12 @@ namespace Speechtrix
         public Speechtrix()
         {
             rand = new Random();
-            gamefield = new bool[maxSizeRow,maxSizeCol];
+            gamefield = new bool[maxX,maxY];
 			linesToNextLevel = nextLevelLines;
 
-			startRow = 0; startCol = 0;
+			startY = 0; startX = 0;
 			height = 20; width = 10;
-			endCol = height; endRow = width;
+			endY = height; endX = width;
             Debug.Print("creating speechtrix");
             g = new Graphics(width, height, this);
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
@@ -71,11 +71,11 @@ namespace Speechtrix
         }
         void newGame() //nollställer tid, score, level, tömmer matris gamefield
         {
-            for (int i = startRow; i < endRow; i++)
-                for (int j = startCol; j < endCol; j++)
-                    gamefield[i, j] = false;
+            for (int x = startX; x < endX; x++)
+                for (int y = startY; y < endY; y++)
+                    gamefield[x, y] = false;
 
-            speed = 1500;
+            speed = 400;
             level = 1;
             score = 0;
             linesToNextLevel = nextLevelLines;
@@ -86,7 +86,28 @@ namespace Speechtrix
             updateScore(2523);
         }
 
-
+        void copyNextToCurrent()
+        {
+            current.nr = next.nr;
+            current.rot = next.rot;
+            current.blo = Blocks.getRotations(current.nr, next.rot);
+            current.bxs = next.bxs;
+            current.bys = next.bys;
+            current.x = next.x;
+            current.y = next.y;
+            current.color = next.color;
+        }
+        void initiateNewNext()
+        {
+            next.nr = (short)rand.Next(0, 7);
+            next.rot = (short)rand.Next(0, 4);
+            next.blo = Blocks.getRotations(next.nr, next.rot);
+            next.bxs = sizes[0][next.nr, next.rot];
+            next.bys = sizes[1][next.nr, next.rot];
+            next.y = 0;
+            next.x = (short)(width / 2 - next.bxs / 2);
+            next.color = cola[next.nr];
+        }
 
 
 
@@ -95,14 +116,8 @@ namespace Speechtrix
         {
             current = new LogicBlock();
             next = new LogicBlock();
-            
-            next.nr = (short)rand.Next(0, 7);
-            next.rot = (short)rand.Next(0, 4);
-            next.blo = Blocks.getRotations(next.nr, next.rot);
-            next.bxs = sizes[0][next.nr, next.rot];
-            next.bys = sizes[1][next.nr, next.rot];
-            next.y = 0;
-            next.x = (short) ((width-next.bxs)/2);
+
+            initiateNewNext();
 
             newBlock = true;
 
@@ -111,33 +126,18 @@ namespace Speechtrix
                 if (newBlock)
                 {
                     newBlock = false;
-                    
-                    current = next;
-                    
-                    next.nr = (short)rand.Next(0, 7);
-                    next.rot = (short)rand.Next(0, 4);
-                    next.blo = Blocks.getRotations(next.nr, next.rot);
-                    next.bxs = sizes[0][next.nr, next.rot];
-                    next.bys = sizes[1][next.nr, next.rot];
-                    next.y++;
-                    next.x = (short)(width / 2 - next.bxs / 2);
-                    next.color = cola[next.nr];
-                    
-                    g.setNext(next.nr, next.rot, next.color);
-                    g.setBlock(current.nr,current.rot,current.x,current.y,current.color);
-                    Debug.Print("Sizes: " + current.x + " " + current.y);
+                    copyNextToCurrent();
+                    initiateNewNext();
+                    g.setNext(next);
+                    Debug.Print("Sizes: " + current.bxs + " " + current.bys);
                 }
 
-                if (true) //ska vara checkRowBelow() här sen
-                {
-                    //g.lockBlock(current.nr, current.rot, current.x, current.y, current.color);
-                    newBlock = true;
-                }
+				g.setBlock(current); //update falling block graphically
+                
+                if (checkRowBelow())
+                    lockBlock();
                 else
-                {
                     current.y++; //falling
-                    g.setBlock(current.nr, current.rot, current.x, current.y, current.color); //paint
-                }
 
                 Thread.Sleep(speed);
             }
@@ -145,10 +145,64 @@ namespace Speechtrix
         }
         /*************************************************/
 
+        void lockBlock()
+        {
+            for (int x = 0; x < current.bxs; x++)
+            { 
+                for (int y = 0; y < current.bys; y++)
+                {
+                    if (current.blo[x, y])
+                    {
+                        gamefield[current.x + x, current.y + y] = true;
+                    }
+                }
+            }
+			/*for (int i = 0; i < height; i++)
+			{
+				for (int j = 0; j < width; j++)
+				{
+					if (gamefield[j, i])
+						Debug.Print(""+1);
+					else
+						Debug.Print(""+0);
+				}
+			}*/
+            g.lockBlock(current, next);
+            newBlock = true;
+        }
+
+		int[][] getRealCoord()
+		{
+			int[][] co = new int[4][];
+			int count = 0;
+			for (int x=0; x < current.bxs; x++)
+			{
+				for (int y=0; y < current.bys; y++)
+				{
+					if (current.blo[x,y])
+					{
+						co[count] = new int[2]{
+						    x+current.x,
+						    y+current.y
+                        };
+						count++;
+					}
+				}
+			}
+			return co;
+		}
 
         bool checkRowBelow()
         {
-            for (int i=0; i<width; i++) ;
+			Debug.Print("\ncheckrow");
+            int[][] coord = new int[4][] { new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 } };
+            coord = getRealCoord();
+
+			for (int i = 0; i < 4; i++) //gå igenom blockets 4 (x,y)-koordinater
+                if (gamefield[coord[i][0], coord[i][1]+1] //om det på raden under en koordinat finns sparat block
+                    || coord[i][1] == height-1) //om y-koordinat är på sista raden
+					return true;
+
             return false;
         }
 
@@ -199,11 +253,11 @@ namespace Speechtrix
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
 		{
 			int deletedLines = 0;
-			for (int i=startRow; i<endRow; i++)
+			for (int i=startY; i<endY; i++)
 			{
-				int j = startCol;
-				for (; j<maxSizeCol && !gamefield[i,j]; j++) ; //as long as gamefield is all true on a row
-				if (j==maxSizeCol) //if whole row true
+				int j = startX;
+				for (; j<maxX && !gamefield[j,i]; j++) ; //as long as gamefield is all true on a row
+				if (j==maxX) //if whole row true
 				{
 					deletedLines++;
 					deleteLine(i);
@@ -214,11 +268,11 @@ namespace Speechtrix
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
-			for (int i = lineNumber; i > startRow + 1; i--)
+			for (int y = lineNumber; y > startY; y--)
 			{
-				for (int j = startCol; j < endCol; j++)
+				for (int x = startX; x < endX; x++)
 				{
-					gamefield[i, j] = gamefield[i - 1, j];
+                    gamefield[x, y] = gamefield[x, y - 1];
 				}
 			}
             g.removeRow(lineNumber);
@@ -277,17 +331,5 @@ namespace Speechtrix
             }
         }
 
-    }
-
-    class LogicBlock
-    {
-        public short nr, x, y, bxs, bys, rot;
-        public Color color;
-        public bool[,] blo = new bool[4,4];
-
-        public LogicBlock()
-        {
-            blo = new bool[4,4];
-        }      
     }
 }

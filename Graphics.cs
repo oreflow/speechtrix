@@ -37,9 +37,11 @@ namespace Speechtrix
        static Color[,] currentColor;
        static Color[,] defaultColor;
 
-       static int currentBlockX = 0;
-       static int currentBlockY = 0;
-       static bool[,] currentBlock = new bool [4,4];
+		static LogicBlock current = new LogicBlock();
+		
+       //static int currentBlockX = 0;
+       //static int currentBlockY = 0;
+       //current.blo    static bool[,] currentBlock = new bool [4,4];
        static bool running;
        static Speechtrix callBack;
 
@@ -61,6 +63,9 @@ namespace Speechtrix
          */
         public Graphics(int Xsize, int Ysize, Speechtrix _callBack )
         {
+			current.x = 0;
+			current.y = 0;
+
             callBack = _callBack;
 
 
@@ -277,20 +282,15 @@ namespace Speechtrix
          */
         private static void DrawNextBlock(short blockID, short rotation, Color col)
         {
-            
             // Draw "next" GRID
-            
-
             int startX = (int)(SCREEN_WIDTH * 0.75);
             int startY = (int)(SCREEN_HEIGHT * 0.55);
             bool swit = false;
             int nextBlockSize = (int)(SCREEN_WIDTH * 0.05);
 
-
             bool nextGrid = true;
             if (nextGrid)
             {
-                
                 for (int x = 0; x < 4; x++)
                 {
                     swit = !swit;
@@ -306,13 +306,48 @@ namespace Speechtrix
             }
 
             // Draw the block on the GRID
-         
 		   bool [,] block = Blocks.getRotations(blockID, rotation);
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                     if(block[x,y])
                         StyleNextRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, col);
 
+
+            screen.Update();
+        }
+        /*
+         * Draws out the given block as "next-block"
+         */
+        private static void DrawNextBlock(LogicBlock lb)
+        {
+            // Draw "next" GRID
+            int startX = (int)(SCREEN_WIDTH * 0.75);
+            int startY = (int)(SCREEN_HEIGHT * 0.55);
+            bool swit = false;
+            int nextBlockSize = (int)(SCREEN_WIDTH * 0.05);
+
+            bool nextGrid = true;
+            if (nextGrid)
+            {
+                for (int x = 0; x < 4; x++)
+                {
+                    swit = !swit;
+                    for (int y = 0; y < 4; y++)
+                    {
+                        if (swit)
+                            FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, gridColor1);
+                        else
+                            FillRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, gridColor2);
+                        swit = !swit;
+                    }
+                }
+            }
+
+            // Draw the block on the GRID
+            for (int x = 0; x < lb.bxs; x++)
+                for (int y = 0; y < lb.bys; y++)
+                    if (lb.blo[x, y])
+                        StyleNextRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, lb.color);
 
             screen.Update();
         }
@@ -327,8 +362,8 @@ namespace Speechtrix
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                 {
-                    if (currentBlock[x, y])
-                        FillRect(boardX + (currentBlockX + x) * blockSize, boardY + (currentBlockY + y) * blockSize, blockSize, defaultColor[currentBlockX + x, currentBlockY + y]);
+                    if (current.blo[x, y])
+                        FillRect(boardX + (current.x + x) * blockSize, boardY + (current.y + y) * blockSize, blockSize, defaultColor[current.x + x, current.y + y]);
                 }
 
             for (int x = 0; x < 4; x++)
@@ -343,29 +378,85 @@ namespace Speechtrix
                         StyleRect(boardX + (Xpos + x) * blockSize, boardY + (Ypos + y) * blockSize, blockSize, col);
                 }
 
-            currentBlock = block;
-            currentBlockX = Xpos;
-            currentBlockY = Ypos;
+            current.blo = block;
+            current.x = (short) Xpos;
+            current.y = (short) Ypos;
 
         }
+		/*
+         * Draws a given block on the game board, at position Xpos, Ypos, Color col
+         */
+		private static void DrawBlock(LogicBlock lb)
+		{
+			for (int x = 0; x < lb.bxs; x++) //if less than x-maxsize of block
+				for (int y = 0; y < lb.bys; y++) //if less than y-size of block
+				{
+					if (current.blo[x, y]) //if x,y is a square in the block
+                        FillRect(boardX + (current.x + x) * blockSize, boardY + (current.y + y) * blockSize, blockSize, defaultColor[current.x + x, current.y + y]);
+				}
+
+			for (int x = 0; x < lb.bxs; x++)
+				for (int y = 0; y < lb.bys; y++)
+				{
+					if (lb.blo[x, y] && ((lb.x + x) > boardX || (lb.y + y) > boardY))
+					{
+						Events.QuitApplication();
+						throw new FormatException();
+					}
+					if (lb.blo[x, y])
+						StyleRect(boardX + (lb.x + x) * blockSize, boardY + (lb.y + y) * blockSize, blockSize, lb.color);
+				}
+
+			current.blo = lb.blo;
+			current.x = lb.x;
+			current.y = lb.y;
+		}
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
          */
-        private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col)
+        private static void lockBlockInPosition(short blockID, short rotation, int Xpos, int Ypos, Color col, short[][,] sizes)
         {
             for (int x = 0; x < 4; x++)
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    if (currentBlock[x, y])
+                    if (current.blo[x, y])
                     {
-                        currentColor[x, y] = col;
-                        currentBlock[x, y] = false;
+                        currentColor[x+Xpos, y+Ypos] = col;
+                        current.blo[x+Xpos, y+Ypos] = false;
                     }
                 }
             }
-            currentBlockX = 0;
-            currentBlockY = 0;
+            current.x = 0;
+            current.y = 0;
+        }
+        /*
+         * Locks a block to its position so that it will be drawn out as a landed unmovable block
+         */
+        private static void lockBlockInPosition(LogicBlock logblock, LogicBlock next) //låser bara x0,y0
+        {
+            try
+            {
+                Debug.Print("bxs: " + logblock.bxs + ", bxy: " + logblock.bys);
+                for (int x=0; x < logblock.bxs; x++)
+                {
+                    for (int y=0; y < logblock.bys; y++)
+                    {
+                        Debug.Print(x + ", " + y + ": " + logblock.blo[x, y]);
+                        if (logblock.blo[x, y])
+                        {
+                            currentColor[x + logblock.x, y + logblock.y] = logblock.color;
+                        }
+                    }
+                }
+            }    catch(IndexOutOfRangeException e) //should not happen now
+            {
+                Debug.Print("CATCH!: "+(logblock.x) + "  " + (logblock.y));
+            } 
+
+		//	current.x = 0;
+		//	current.y = 0;
+            copyNextToCurrent(next);
         }
         
 
@@ -670,6 +761,13 @@ namespace Speechtrix
             DrawNextBlock(blockID, rotation, col);
             screen.Update();
         }
+        public void setNext(LogicBlock lb)
+        {
+            if (!running)
+                return;
+            DrawNextBlock(lb);
+            screen.Update();
+        }
         public void setBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
         {
             if (!running)
@@ -677,11 +775,25 @@ namespace Speechtrix
             DrawBlock(blockID, rotation, Xpos, Ypos, col);
             screen.Update();
         }
-        public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col)
+		public void setBlock(LogicBlock logblock)
+		{
+			if (!running)
+				return;
+			DrawBlock(logblock);
+			screen.Update();
+		}
+        public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col, short[][,] sizes)
         {
             if (!running)
                 return;
-            lockBlockInPosition(blockID, rotation, Xpos, Ypos, col);
+            lockBlockInPosition(blockID, rotation, Xpos, Ypos, col, sizes);
+            Draw();
+        }
+        public void lockBlock(LogicBlock logblock, LogicBlock next)
+        {
+            if (!running)
+                return;
+            lockBlockInPosition(logblock, next);
             Draw();
         }
         public void removeRow(int rownr)
@@ -699,6 +811,17 @@ namespace Speechtrix
         public void setStressAnimation()
         {
 
+        }
+        static void copyNextToCurrent(LogicBlock next)
+        {
+            current.nr = next.nr;
+            current.rot = next.rot;
+            current.blo = Blocks.getRotations(current.nr, next.rot);
+            current.bxs = next.bxs;
+            current.bys = next.bys;
+            current.x = next.x;
+            current.y = next.y;
+            current.color = next.color;
         }
     }
 }
