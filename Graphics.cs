@@ -451,6 +451,7 @@ namespace Speechtrix
 		//	current.x = 0;
 		//	current.y = 0;
 
+            DrawBlock(current);
             copyNextToCurrent(next);
         }
         
