@@ -254,7 +254,8 @@ namespace Speechtrix
 					g.removeRow(i);
 				}
 			}
-			updateScore(deletedLines);  
+            if (deletedLines>0)
+			    updateScore(deletedLines);  
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
@@ -270,10 +271,34 @@ namespace Speechtrix
 
         bool canGoLeft()
         {
+            if (current.x <= 0)
+                return false;
+            
+            rotateCheck.nr = current.nr;
+            rotateCheck.state = current.state;
+            rotateCheck.x = current.x;
+            rotateCheck.x--;
+            for (int i = 0; i < rotateCheck.bxs; i++)
+                for (int j = 0; j < rotateCheck.bys; j++)
+                    if (rotateCheck.getState()[i, j] && gamefield[i + rotateCheck.x, j + current.y])
+                        return false;
+
             return true;
         }
         bool canGoRight()
         {
+            if (current.x >= width - current.bxs)
+                return false;
+
+            rotateCheck.nr = current.nr;
+            rotateCheck.state = current.state;
+            rotateCheck.x = current.x;
+            rotateCheck.x++;
+            for (int i = 0; i < rotateCheck.bxs; i++)
+                for (int j = 0; j < rotateCheck.bys; j++)
+                    if (rotateCheck.getState()[i, j] && gamefield[i + rotateCheck.x, j + current.y])
+                        return false;
+
             return true;
         }
         bool canRotate()
@@ -297,7 +322,6 @@ namespace Speechtrix
         {
             if (canRotate())
             {
-                Debug.Print("rotate "+(current.state+1)%4);
                 current.state = (short) ((current.state+1) % 4);
                 g.setBlock(current);
             }
@@ -327,22 +351,16 @@ namespace Speechtrix
         {
             if (canGoLeft())
             {
-                if (current.x > 0)
-                {
-                    current.x--;
-                    g.setBlock(current); // makes the graphics bug a bit
-                }
+                current.x--;
+                g.setBlock(current); // makes the graphics bug a bit
             }
         }
         public void keyRight()
         {
             if (canGoRight())
             {
-                if (current.x < width - current.bxs)
-                {
-                    current.x++;
-                    g.setBlock(current); // makes the graphics bug a bit
-                }
+                current.x++;
+                g.setBlock(current); // makes the graphics bug a bit
             }
         }
     }
