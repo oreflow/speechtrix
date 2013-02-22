@@ -89,8 +89,7 @@ namespace Speechtrix
         void copyNextToCurrent()
         {
             current.nr = next.nr;
-            current.rot = next.rot;
-            current.blo = Blocks.getRotations(current.nr, next.rot);
+            current.state = next.state;
             current.bxs = next.bxs;
             current.bys = next.bys;
             current.x = next.x;
@@ -100,10 +99,9 @@ namespace Speechtrix
         void initiateNewNext()
         {
             next.nr = (short)rand.Next(0, 7);
-            next.rot = (short)rand.Next(0, 4);
-            next.blo = Blocks.getRotations(next.nr, next.rot);
-            next.bxs = sizes[0][next.nr, next.rot];
-            next.bys = sizes[1][next.nr, next.rot];
+            next.state = (short)rand.Next(0, 4);
+            next.bxs = sizes[0][next.nr, next.state];
+            next.bys = sizes[1][next.nr, next.state];
             next.y = 0;
             next.x = (short)(width / 2 - next.bxs / 2);
             next.color = cola[next.nr];
@@ -154,7 +152,7 @@ namespace Speechtrix
             { 
                 for (int y = 0; y < current.bys; y++)
                 {
-                    if (current.blo[x, y])
+                    if (current.getRotation()[x, y])
                     {
                         gamefield[current.x + x, current.y + y] = true;
                     }
@@ -182,7 +180,7 @@ namespace Speechtrix
 			{
 				for (int y=0; y < current.bys; y++)
 				{
-					if (current.blo[x,y])
+					if (current.getRotation()[x,y])
 					{
 						co[count] = new int[2]{
 						    x+current.x,
@@ -286,10 +284,8 @@ namespace Speechtrix
 		}
         public void keyUp()
         {
-            current.rot = (short)((current.rot++) % 4);
+            current.state = (short)((current.state++) % 4);
 
-            current.blo = Blocks.getRotations(current.nr, current.rot);
-            
 
         }
         public void keyDown()

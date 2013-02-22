@@ -9,13 +9,24 @@ namespace Speechtrix
 {
     public class LogicBlock
     {
-        public short nr, x, y, bxs, bys, rot;
-        public Color color;
-        public bool[,] blo = new bool[4, 4]; // unnecessary to double store? could just make it to a wrapper
-
-        public LogicBlock()
+        public short nr
         {
-            blo = new bool[4, 4];
+            set { bl = blocks.getBlock(value); }
+            get { return bl.id; }
+        }
+        public short x { get; set; }
+        public short y { get; set; }
+        public short bxs { get; set; }
+        public short bys { get; set; }
+        public short state { get; set; }
+        public Color color { get; set; }
+        
+        static Blocks blocks = new Blocks();
+        Block bl = blocks.getBlock(0);
+
+        public bool[,] getRotation()
+        {
+            return Blocks.getRotations(nr, state);
         }
     }
 }
