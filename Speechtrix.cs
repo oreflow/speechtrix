@@ -293,7 +293,7 @@ namespace Speechtrix
         }
         public void keyRight()
         {
-            if (current.x < width - current.bxs) // should probably be changed to depending on the width of the block
+            if (current.x < width - current.bxs)
             {
                 current.x++;
                 g.setBlock(current); // makes the graphics bug a bit
