@@ -133,9 +133,12 @@ namespace Speechtrix
                 }
 
 				g.setBlock(current); //update falling block graphically
-                
+
                 if (checkRowBelow())
+                {
                     lockBlock();
+                    checkFullLine();
+                }
                 else
                     current.y++; //falling
 
@@ -252,8 +255,12 @@ namespace Speechtrix
 		}
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
 		{
+            // ingen poäng med att kolla alla rader, man behöver bara current-blocks rader eftersom att det bara är de som kan ha blivit fulla
 			int deletedLines = 0;
-			for (int i=startY; i<endY; i++)
+            short minY = current.y;
+            short maxY = current.bys;
+			//for (int i=startY; i<endY; i++)
+            for (int i = minY; i < maxY; i++)
 			{
 				int j = startX;
 				for (; j<maxX && !gamefield[j,i]; j++) ; //as long as gamefield is all true on a row
@@ -276,10 +283,13 @@ namespace Speechtrix
 				}
 			}
             g.removeRow(lineNumber);
-			//anropa deleteLine i graphics
 		}
         public void keyUp()
         {
+            current.rot = (short)((current.rot++) % 4);
+
+            current.blo = Blocks.getRotations(current.nr, current.rot);
+            
 
         }
         public void keyDown()
@@ -288,11 +298,19 @@ namespace Speechtrix
         }
         public void keyLeft()
         {
-
+                if (current.x > 0)
+                {
+                    current.x--;
+                    g.setBlock(current); // makes the graphics bug a bit
+                }
         }
         public void keyRight()
         {
-
+            if (current.x < width - current.bxs) // should probably be changed to depending on the width of the block
+            {
+                current.x++;
+                g.setBlock(current); // makes the graphics bug a bit
+            }
         }
     }
     class TimerThread

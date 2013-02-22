@@ -11,7 +11,7 @@ namespace Speechtrix
     {
         public short nr, x, y, bxs, bys, rot;
         public Color color;
-        public bool[,] blo = new bool[4, 4];
+        public bool[,] blo = new bool[4, 4]; // unnecessary to double store? could just make it to a wrapper
 
         public LogicBlock()
         {
