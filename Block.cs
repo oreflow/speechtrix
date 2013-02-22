@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace Speechtrix
 {
     public class Block
     {
+        Color[] cola = new Color[7]
+            {Color.FromArgb(226, 0, 127), Color.FromArgb(255, 0, 0), Color.FromArgb(0, 255, 0), 
+                Color.FromArgb(12, 0, 247), Color.FromArgb(255, 240, 0), Color.FromArgb(122, 78, 156),
+                Color.FromArgb(45, 237, 120)};
+
+
 		public short id { get; set; } //from 0-6
 		private bool[][,] rotations; //each 4 rotations for a block
+        public Color color { get; set; }
 
         public Block(short pId)
         {
@@ -18,7 +26,13 @@ namespace Speechtrix
             else
                 id = 0;
 
+            initColor();
             initRotations();
+        }
+
+        void initColor()
+        {
+            color = cola[id];
         }
 
 		public bool[,] getRot(short rot)

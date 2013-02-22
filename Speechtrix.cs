@@ -14,16 +14,7 @@ namespace Speechtrix
         const int maxY = 32;
         const int maxX = 64;
 		const int nextLevelLines = 20;
-        Color[] cola = new Color[7]
-            {Color.FromArgb(226, 0, 127), Color.FromArgb(255, 0, 0), Color.FromArgb(0, 255, 0), 
-                Color.FromArgb(12, 0, 247), Color.FromArgb(255, 240, 0), Color.FromArgb(122, 78, 156),
-                Color.FromArgb(45, 237, 120)};
-
-        short[][,] sizes = new short[2][,]
-        {
-            new short[7,4]{{2,3,2,3},{1,4,1,4},{2,2,2,2},{2,3,2,3},{2,3,2,3},{2,3,2,3},{2,3,2,3}},
-            new short[7,4]{{3,2,3,2},{4,1,4,1},{2,2,2,2},{3,2,3,2},{3,2,3,2},{3,2,3,2},{3,2,3,2}}
-        };
+        
         bool newBlock;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
@@ -100,11 +91,11 @@ namespace Speechtrix
         {
             next.nr = (short)rand.Next(0, 7);
             next.state = (short)rand.Next(0, 4);
-            next.bxs = sizes[0][next.nr, next.state];
-            next.bys = sizes[1][next.nr, next.state];
+    //        next.bxs = sizes[0][next.nr, next.state];
+    //        next.bys = sizes[1][next.nr, next.state];
             next.y = 0;
             next.x = (short)(width / 2 - next.bxs / 2);
-            next.color = cola[next.nr];
+    //        next.color = cola[next.nr];
         }
 
 

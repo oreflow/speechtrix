@@ -16,11 +16,29 @@ namespace Speechtrix
         }
         public short x { get; set; }
         public short y { get; set; }
-        public short bxs { get; set; }
-        public short bys { get; set; }
-        public short state { get; set; }
-        public Color color { get; set; }
-        
+        public short bxs;
+        public short bys;
+        private short _state;
+        public short state
+        {
+            set
+            {
+                _state = value;
+                bxs = Blocks.sizes[0][nr, _state];
+                bys = Blocks.sizes[1][nr, _state];
+            }
+            get
+            {
+                return _state;
+            }
+        }
+        public Color color {
+            get { return bl.color; }
+            set { }
+        }
+        public bool movable { get; set; }
+
+
         static Blocks blocks = new Blocks();
         Block bl = blocks.getBlock(0);
 
