@@ -86,7 +86,28 @@ namespace Speechtrix
             updateScore(2523);
         }
 
-
+        void copyNextToCurrent()
+        {
+            current.nr = next.nr;
+            current.rot = next.rot;
+            current.blo = Blocks.getRotations(current.nr, next.rot);
+            current.bxs = next.bxs;
+            current.bys = next.bys;
+            current.x = next.x;
+            current.y = next.y;
+            current.color = next.color;
+        }
+        void initiateNewNext()
+        {
+            next.nr = (short)rand.Next(0, 7);
+            next.rot = (short)rand.Next(0, 4);
+            next.blo = Blocks.getRotations(next.nr, next.rot);
+            next.bxs = sizes[0][next.nr, next.rot];
+            next.bys = sizes[1][next.nr, next.rot];
+            next.y = 0;
+            next.x = (short)(width / 2 - next.bxs / 2);
+            next.color = cola[next.nr];
+        }
 
 
 
@@ -95,14 +116,8 @@ namespace Speechtrix
         {
             current = new LogicBlock();
             next = new LogicBlock();
-            
-            next.nr = (short)rand.Next(0, 7);
-            next.rot = (short)rand.Next(0, 4);
-            next.blo = Blocks.getRotations(next.nr, next.rot);
-            next.bxs = sizes[0][next.nr, next.rot];
-            next.bys = sizes[1][next.nr, next.rot];
-            next.y = 0;
-            next.x = (short) ((width-next.bxs)/2);
+
+            initiateNewNext();
 
             newBlock = true;
 
@@ -111,28 +126,18 @@ namespace Speechtrix
                 if (newBlock)
                 {
                     newBlock = false;
-                    
-                    current = next;
-                    
-                    next.nr = (short)rand.Next(0, 7);
-                    next.rot = (short)rand.Next(0, 4);
-                    next.blo = Blocks.getRotations(next.nr, next.rot);
-                    next.bxs = sizes[0][next.nr, next.rot];
-                    next.bys = sizes[1][next.nr, next.rot];
-                    next.y = 0;
-                    next.x = (short)(width / 2 - next.bxs / 2);
-                    next.color = cola[next.nr];
-                    
-                    g.setNext(next.nr, next.rot, next.color);
-                    g.setBlock(current.nr,current.rot,current.x,current.y,current.color);
+                    copyNextToCurrent();
+                    initiateNewNext();
+                    g.setNext(next);
                     Debug.Print("Sizes: " + current.bxs + " " + current.bys);
                 }
-                g.setBlock(current.nr, current.rot, current.x, current.y, current.color); //paint
+
+				g.setBlock(current); //update falling block graphically
                 
                 if (checkRowBelow())
-                    lockBlock(current);
-
-                current.y++; //falling
+                    lockBlock();
+                else
+                    current.y++; //falling
 
                 Thread.Sleep(speed);
             }
@@ -140,11 +145,11 @@ namespace Speechtrix
         }
         /*************************************************/
 
-        void lockBlock(LogicBlock b)
+        void lockBlock()
         {
-            for (int x = 0; x < b.bxs; x++)
+            for (int x = 0; x < current.bxs; x++)
             { 
-                for (int y = 0; y < b.bys; y++)
+                for (int y = 0; y < current.bys; y++)
                 {
                     if (current.blo[x, y])
                     {
@@ -152,7 +157,17 @@ namespace Speechtrix
                     }
                 }
             }
-            g.lockBlock(current);
+			/*for (int i = 0; i < height; i++)
+			{
+				for (int j = 0; j < width; j++)
+				{
+					if (gamefield[j, i])
+						Debug.Print(""+1);
+					else
+						Debug.Print(""+0);
+				}
+			}*/
+            g.lockBlock(current, next);
             newBlock = true;
         }
 
@@ -164,7 +179,7 @@ namespace Speechtrix
 			{
 				for (int y=0; y < current.bys; y++)
 				{
-					if (current.blo[y,x])
+					if (current.blo[x,y])
 					{
 						co[count] = new int[2]{
 						    x+current.x,
@@ -183,13 +198,11 @@ namespace Speechtrix
             int[][] coord = new int[4][] { new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 }, new int[2] { 0, 0 } };
             coord = getRealCoord();
 
-			for (int i = 0; i < 4; i++)
-			{
-                if (gamefield[coord[i][0], coord[i][1]+1] || coord[i][1]+1 >= height)
-				{
+			for (int i = 0; i < 4; i++) //gå igenom blockets 4 (x,y)-koordinater
+                if (gamefield[coord[i][0], coord[i][1]+1] //om det på raden under en koordinat finns sparat block
+                    || coord[i][1] == height-1) //om y-koordinat är på sista raden
 					return true;
-				}
-			}
+
             return false;
         }
 
