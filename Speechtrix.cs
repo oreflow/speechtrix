@@ -13,10 +13,9 @@ namespace Speechtrix
     {
         const int maxY = 32;
         const int maxX = 64;
-		const int nextLevelLines = 20;
+		const int nextLevelLines = 10;
         
         bool newBlock;
-        bool gotonext = false;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
@@ -68,7 +67,7 @@ namespace Speechtrix
                 for (int y = startY; y < endY; y++)
                     gamefield[x, y] = false;
 
-            speed = 400;
+            speed = 1000;
             level = 1;
             score = 0;
             linesToNextLevel = nextLevelLines;
@@ -76,7 +75,7 @@ namespace Speechtrix
             TimerThread timer = new TimerThread(ref g);
             tt = new Thread(new ThreadStart(timer.Run));
             tt.Start();
-            updateScore(2523);
+            updateScore(score);
         }
 
         void copyNextToCurrent()
@@ -94,7 +93,7 @@ namespace Speechtrix
         {
             next.nr = (short)rand.Next(0, 7);
             next.state = (short)rand.Next(0, 4);
-            next.y = 0;
+            next.y = 0; // (short)-next.bys;
             next.x = (short)(width / 2 - next.bxs / 2);
             next.movable = true;
         }
@@ -116,11 +115,10 @@ namespace Speechtrix
                 if (newBlock)
                 {
                     newBlock = false;
+
                     copyNextToCurrent();
                     initiateNewNext();
                     g.setNext(next);
-                    Debug.Print("Sizes: " + current.bxs + " " + current.bys);
-                    gotonext = false;
                 }
 
 				g.setBlock(current); //update falling block graphically
@@ -130,7 +128,7 @@ namespace Speechtrix
                     lockBlock();
                     checkFullLine();
                 }
-                else if (!gotonext)
+                else if (current.movable) //om man inte tryckt ner så att block låsts
                 {
                     current.y++; //falling
                     Thread.Sleep(speed);
@@ -229,11 +227,20 @@ namespace Speechtrix
         void updateScore(int lines) //hur många lines som tagit bort
 		{
 			linesToNextLevel -= lines;
-			if (linesToNextLevel <= 0)
-				linesToNextLevel += nextLevelLines;
+            if (linesToNextLevel <= 0)
+            {
+                newLevel();
+                linesToNextLevel += nextLevelLines;
+            }
 
-			score += level*10*lines;
-            Debug.Print("POints:  " + score);
+            switch (lines)
+            {
+                case 1: score += level * 10 * lines; break;
+                case 2: score += level * 20 * lines; break;
+                case 3: score += level * 40 * lines; break;
+                case 4: score += level * 100 * lines; break;
+                default: break;
+            }
             g.setScore(score);
 		}
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
@@ -242,7 +249,6 @@ namespace Speechtrix
 			int deletedLines = 0;
             short minY = current.y;
             short maxY = (short) (current.y+current.bys);
-			//for (int i=startY; i<endY; i++)
             for (int i = minY; i < maxY; i++)
 			{
 				int j = startX;
@@ -327,23 +333,21 @@ namespace Speechtrix
         }
         public void keyDown()
         {
-            if (checkRowBelow())
+            if (current.movable)
             {
-                lockBlock();
-                checkFullLine();
-                gotonext = true;
-            }
-            else
-            {
-                current.y++;
-                g.setBlock(current);
-            }
+                //current.y++;
 
-            if (checkRowBelow())
-            {
+                /***as long as possible***/
+                while (current.y < height)
+                {
+                    if (!checkRowBelow())
+                        current.y++;
+                    else
+                        break;
+                }
                 lockBlock();
+                g.setBlock(current);
                 checkFullLine();
-                gotonext = true;
             }
         }
         public void keyLeft()
