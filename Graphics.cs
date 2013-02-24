@@ -626,23 +626,25 @@ namespace Speechtrix
         /*
          * Removes one of the "locked" rows from the board since the row has been filled. 
          */
-        private static void clearRow(int rownr)
+        private static void clearRow(int[] deleteLines)
         {
-            for (int x = 0; x < blockX; x++)
+            for (int i = 0; i<4 && deleteLines[i] != 999; i++)
             {
-                for (int y = rownr; y > 0; y--)
+                for (int x = 0; x < blockX; x++)
                 {
-                    if(currentColor[x,y-1] == gridColor1 || currentColor[x,y-1] == gridColor2)
+                    for (int y = deleteLines[i]; y > 0; y--)
                     {
-                        currentColor[x, y] = defaultColor[x, y];
-                        continue;
+                        if(currentColor[x,y-1] == gridColor1 || currentColor[x,y-1] == gridColor2)
+                        {
+                            currentColor[x, y] = defaultColor[x, y];
+                            continue;
+                        }
+                        else
+                            currentColor[x, y] = currentColor[x, y - 1];
                     }
-                    else
-                        currentColor[x, y] = currentColor[x, y - 1];
                 }
             }
             CheckScreen();
-            
         }
 
 
@@ -695,11 +697,11 @@ namespace Speechtrix
             lockBlockInPosition(logblock, next);
             Draw();
         }
-        public void removeRow(int rownr)
+        public void removeRow(int[] deleteLines)
         {
             if (!running)
                 return;
-            clearRow(rownr);
+            clearRow(deleteLines);
             CheckScreen();
             Draw();
         }

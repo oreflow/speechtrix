@@ -195,7 +195,7 @@ namespace Speechtrix
             level++;
 			linesToNextLevel = nextLevelLines;
 			if (speed > 100)
-				setSpeed(speed-nextLevelLines);
+				setSpeed(speed-50);
         }
 		void setSpeed(int ms) //sätter fallhastighet
 		{
@@ -246,7 +246,9 @@ namespace Speechtrix
         void checkFullLine() //kolla om det finns några rader i matrisen där alla är true, isf anropa deleteLine för varje rad
 		{
             // ingen poäng med att kolla alla rader, man behöver bara current-blocks rader eftersom att det bara är de som kan ha blivit fulla
-			int deletedLines = 0;
+            int[] deleteLines = new int[4] { 999, 999, 999, 999 };
+            int count = 0;
+            int deletedLines = 0;
             short minY = current.y;
             short maxY = (short) (current.y+current.bys);
             for (int i = minY; i < maxY; i++)
@@ -257,11 +259,15 @@ namespace Speechtrix
 				{
 					deletedLines++;
 					deleteLine(i);
-					g.removeRow(i);
+                    deleteLines[count] = i;
+                    count++;
 				}
 			}
-            if (deletedLines>0)
-			    updateScore(deletedLines);  
+            if (deletedLines > 0)
+            {
+                g.removeRow(deleteLines);
+                updateScore(deletedLines);
+            }
 		}
 		void deleteLine(int lineNumber) //i matrisen, flytta alla bool-värden från rader ovanför lineNumber en rad nedåt, anropar updateScore
 		{
