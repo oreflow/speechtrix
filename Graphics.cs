@@ -74,8 +74,8 @@ namespace Speechtrix
             currentColor = new Color[blockX, blockY];
             defaultColor = new Color[blockX, blockY];
 
-            gridColor1 = Color.FromArgb(100,100,100);
-            gridColor2 = Color.FromArgb(155, 155, 155);
+            gridColor1 = Color.FromArgb(200,200,200);
+            gridColor2 = Color.FromArgb(175, 175, 175);
 
             // adding default colors to currentColor and to defaultColor
             bool swit = false;
