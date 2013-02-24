@@ -41,7 +41,7 @@ namespace Speechtrix
 		
         //static int currentBlockX = 0;
         //static int currentBlockY = 0;
-        //current.getRotation()    static bool[,] currentBlock = new bool [4,4];
+        //current.getState()    static bool[,] currentBlock = new bool [4,4];
         static bool running;
         static Speechtrix callBack;
 
@@ -342,7 +342,7 @@ namespace Speechtrix
             // Draw the block on the GRID
             for (int x = 0; x < lb.bxs; x++)
                 for (int y = 0; y < lb.bys; y++)
-                    if (lb.getRotation()[x, y])
+                    if (lb.getState()[x, y])
                         StyleNextRect(startX + x * nextBlockSize, startY + y * nextBlockSize, nextBlockSize, lb.color);
 
             screen.Update();
@@ -357,7 +357,7 @@ namespace Speechtrix
             for (int x = 0; x < 4; x++)
                 for (int y = 0; y < 4; y++)
                 {
-                    if (current.getRotation()[x, y])
+                    if (current.getState()[x, y])
                         FillRect(boardX + (current.x + x) * blockSize, boardY + (current.y + y) * blockSize, blockSize, defaultColor[current.x + x, current.y + y]);
                 }
 
@@ -385,12 +385,12 @@ namespace Speechtrix
 			for (int x = 0; x < lb.bxs; x++)
 				for (int y = 0; y < lb.bys; y++)
 				{
-					if (lb.getRotation()[x, y] && ((lb.x + x) > boardX || (lb.y + y) > boardY))
+					if (lb.getState()[x, y] && ((lb.x + x) > boardX || (lb.y + y) > boardY))
 					{
 						Events.QuitApplication();
 						throw new FormatException();
 					}
-					if (lb.getRotation()[x, y])
+					if (lb.getState()[x, y])
 						StyleRect(boardX + (lb.x + x) * blockSize, boardY + (lb.y + y) * blockSize, blockSize, lb.color);
 				}
 
@@ -426,10 +426,10 @@ namespace Speechtrix
             {
                 for (int y = 0; y < 4; y++)
                 {
-                    if (current.getRotation()[x, y])
+                    if (current.getState()[x, y])
                     {
                         currentColor[x+Xpos, y+Ypos] = col;
-                        current.getRotation()[x+Xpos, y+Ypos] = false;
+                        current.getState()[x+Xpos, y+Ypos] = false;
                     }
                 }
             }
@@ -448,8 +448,8 @@ namespace Speechtrix
                 {
                     for (int y=0; y < logblock.bys; y++)
                     {
-                        Debug.Print(x + ", " + y + ": " + logblock.getRotation()[x, y]);
-                        if (logblock.getRotation()[x, y])
+                        Debug.Print(x + ", " + y + ": " + logblock.getState()[x, y]);
+                        if (logblock.getState()[x, y])
                         {
                             currentColor[x + logblock.x, y + logblock.y] = logblock.color;
                         }
@@ -721,6 +721,7 @@ namespace Speechtrix
         private static void clearRow(int rownr)
         {
             for (int x = 0; x < blockX; x++)
+            {
                 for (int y = rownr; y > 0; y--)
                 {
                     if(currentColor[x,y-1] == gridColor1 || currentColor[x,y-1] == gridColor2)
@@ -728,8 +729,12 @@ namespace Speechtrix
                         currentColor[x, y] = defaultColor[x, y];
                         break;
                     }
-                    currentColor[x, y] = currentColor[x, y - 1];
+                    else
+                        currentColor[x, y] = currentColor[x, y - 1];
                 }
+         }
+            screen.Update();
+            screen.Update();
             screen.Update();
             
         }
@@ -785,7 +790,7 @@ namespace Speechtrix
         }
 		public void setBlock(LogicBlock logblock)
 		{
-			if (!running || logblock.movable)
+			if (!running || !logblock.movable)
 				return;
             CheckScreen(logblock);
             DrawBlock(logblock);

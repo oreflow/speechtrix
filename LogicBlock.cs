@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace Speechtrix
 {
@@ -18,6 +19,8 @@ namespace Speechtrix
         public short y { get; set; }
         public short bxs;
         public short bys;
+        public bool movable { get; set; }
+
         private short _state;
         public short state
         {
@@ -32,17 +35,16 @@ namespace Speechtrix
                 return _state;
             }
         }
+
         public Color color {
             get { return bl.color; }
             set { }
         }
-        public bool movable { get; set; }
-
-
+        
         static Blocks blocks = new Blocks();
         Block bl = blocks.getBlock(0);
 
-        public bool[,] getRotation()
+        public bool[,] getState()
         {
             return Blocks.getRotations(nr, state);
         }
