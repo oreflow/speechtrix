@@ -167,7 +167,6 @@ namespace Speechtrix
                         FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x,y]);
 
                 }
-                screen.Update();
             }
 
             if (debug)
@@ -383,13 +382,6 @@ namespace Speechtrix
          */
 		private static void DrawBlock(LogicBlock lb)
 		{
-			for (int x = 0; x < lb.bxs; x++) //if less than x-maxsize of block
-				for (int y = 0; y < lb.bys; y++) //if less than y-size of block
-				{
-					if (current.getRotation()[x, y]) //if x,y is a square in the block
-                        FillRect(boardX + (current.x + x) * blockSize, boardY + (current.y + y) * blockSize, blockSize, defaultColor[current.x + x, current.y + y]);
-				}
-
 			for (int x = 0; x < lb.bxs; x++)
 				for (int y = 0; y < lb.bys; y++)
 				{
@@ -405,6 +397,26 @@ namespace Speechtrix
 			current.x = lb.x;
 			current.y = lb.y;
 		}
+
+        private static void CheckScreen(LogicBlock lb)
+        {
+            for (int x = 0; x < blockX; x++)
+            {
+                for (int y = 0; y < blockY; y++)
+                {
+                    Color tmp = screen.GetPixel(new Point(boardX + x * blockSize, boardY + y * blockSize));
+
+                    if (tmp != currentColor[x, y])
+                    {
+                        if (currentColor[x, y] != gridColor1 && currentColor[x, y] != gridColor2)
+                            StyleRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x, y]);
+                        else
+                            FillRect(boardX + x * blockSize, boardY + y * blockSize, blockSize, currentColor[x, y]);
+                    }
+                }
+            }
+
+        }
         /*
          * Locks a block to its position so that it will be drawn out as a landed unmovable block
          */
@@ -773,9 +785,10 @@ namespace Speechtrix
         }
 		public void setBlock(LogicBlock logblock)
 		{
-			if (!running)
+			if (!running || logblock.movable)
 				return;
-			DrawBlock(logblock);
+            CheckScreen(logblock);
+            DrawBlock(logblock);
 			screen.Update();
 		}
         public void lockBlock(short blockID, short rotation, int Xpos, int Ypos, Color col, short[][,] sizes)
