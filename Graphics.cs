@@ -152,7 +152,7 @@ namespace Speechtrix
             }
         }
         /**
-         * Draws the game-field
+         * Draws the game-field, NOTICE!, Don't use this function. use CheckScreen for redrawing the screen
          */
         private static void Draw()
         {
@@ -385,20 +385,26 @@ namespace Speechtrix
 			for (int x = 0; x < lb.bxs; x++)
 				for (int y = 0; y < lb.bys; y++)
 				{
-					if (lb.getState()[x, y] && ((lb.x + x) > boardX || (lb.y + y) > boardY))
-					{
-						Events.QuitApplication();
-						throw new FormatException();
-					}
-					if (lb.getState()[x, y])
-						StyleRect(boardX + (lb.x + x) * blockSize, boardY + (lb.y + y) * blockSize, blockSize, lb.color);
+                    if((lb.x + x) < blockX && (lb.y + y) < blockY)
+                    {
+					    if (lb.getState()[x, y] && ((lb.x + x) > boardX || (lb.y + y) > boardY))
+					    {
+						    Events.QuitApplication();
+						    throw new FormatException();
+					    }
+					    if (lb.getState()[x, y])
+						    StyleRect(boardX + (lb.x + x) * blockSize, boardY + (lb.y + y) * blockSize, blockSize, lb.color);
+                    }
 				}
 
 			current.x = lb.x;
 			current.y = lb.y;
 		}
-
-        private static void CheckScreen(LogicBlock lb)
+        /**
+         * Function that redraws stuff that are wrong in the board
+         * wrong = differs from what is said in currentColor[x,y]
+         */
+        private static void CheckScreen()
         {
             for (int x = 0; x < blockX; x++)
             {
@@ -733,9 +739,7 @@ namespace Speechtrix
                         currentColor[x, y] = currentColor[x, y - 1];
                 }
          }
-            screen.Update();
-            screen.Update();
-            screen.Update();
+            CheckScreen();
             
         }
 
@@ -792,7 +796,7 @@ namespace Speechtrix
 		{
 			if (!running || !logblock.movable)
 				return;
-            CheckScreen(logblock);
+            CheckScreen();
             DrawBlock(logblock);
 			screen.Update();
 		}

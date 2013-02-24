@@ -266,7 +266,6 @@ namespace Speechtrix
                     gamefield[x, y] = gamefield[x, y - 1];
 				}
 			}
-            g.removeRow(lineNumber);
 		}
 
         bool canGoLeft()
