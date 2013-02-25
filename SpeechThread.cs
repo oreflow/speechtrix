@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
+using System.Diagnostics;
 
 namespace Speechtrix
 {
@@ -13,7 +14,9 @@ namespace Speechtrix
 
         public SpeechThread(Speechtrix callBack)
         {
-
+            SpeechSynthesizer ss = new SpeechSynthesizer();
+            ss.SpeakAsync("Initializing speech component.");
+            Debug.Print("Playing first synthesis");
         }
 
         public void Run()
