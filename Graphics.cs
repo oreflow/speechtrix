@@ -135,6 +135,10 @@ namespace Speechtrix
                     running = false;
                     Events.QuitApplication();
                     break;
+
+                case Key.N:
+                    callBack.keyN();
+                    break;
             }
         }
 
@@ -493,6 +497,11 @@ namespace Speechtrix
                                        { true, false, true, false, false, true, false },// 7
                                        { true, true, true, true, true, true, true },// 8
                                        { true, true, true, true, false, true, true }};// 9
+                                       /*{ false, true, false, true, true, false, true },// t
+                                       { false, true, false, false, true, true, true },// h
+                                       { true, true, false, true, true, false, true },// E
+                                       { false, false, false, false, true, true, true},// n
+                                       { false, false, true, true, true, true, true }};// d*/
             
             short[] width = new short [size/2];
             short tmpWidth = 0;
@@ -522,49 +531,49 @@ namespace Speechtrix
             }
 
             // draw out stuff
-            if (numbers[nr, 0] == true)
+            if (numbers[nr, 0])
             {
                 for(int x = 0; x < size/2 ; x++)
                     for(int y = 0 ; y < width[x] ; y++)
                         screen.Draw(new Point(posX + x, posY + y), col);
             
             }
-            if (numbers[nr, 1] == true)
+            if (numbers[nr, 1])
             {
                 for (int y = 0; y < size / 2; y++)
                     for (int x = 0; x < width[y]; x++)
                         screen.Draw(new Point(posX + x, posY + y), col);
 
             }
-            if (numbers[nr, 2] == true)
+            if (numbers[nr, 2])
             {
                 for (int y = 0; y < size / 2; y++)
                     for (int x = 0; x < width[y]; x++)
                         screen.Draw(new Point(size/2 + posX - x, posY + y), col);
 
             }
-            if (numbers[nr, 3] == true)
+            if (numbers[nr, 3])
             {
                 for (int x = 0; x < size / 2; x++)
                     for (int y = 0; y < width[x]; y++)
                         screen.Draw(new Point(posX + x, size/2 + posY + y), col);
 
             }
-            if (numbers[nr, 4] == true)
+            if (numbers[nr, 4])
             {
                 for (int y = 0; y < size / 2; y++)
                     for (int x = 0; x < width[y]; x++)
                         screen.Draw(new Point(posX + x,size/2 + posY + y), col);
 
             }
-            if (numbers[nr, 5] == true)
+            if (numbers[nr, 5])
             {
                 for (int y = 0; y < size / 2; y++)
                     for (int x = 0; x < width[y]; x++)
                         screen.Draw(new Point(size/2 + posX - x, size/2 + posY + y), col);
 
             }
-            if (numbers[nr, 6] == true)
+            if (numbers[nr, 6])
             {
                 for (int x = 0; x < size / 2; x++)
                     for (int y = 0; y < width[x]; y++)
@@ -713,6 +722,16 @@ namespace Speechtrix
         public void setStressAnimation()
         {
 
+        }
+        public void resetColors()
+        {
+            for (int i = 0; i < blockX; i++)
+            {
+                for (int j = 0; j < blockY; j++)
+                {
+                    currentColor[i, j] = defaultColor[i, j];
+                }
+            }
         }
         static void copyNextToCurrent(LogicBlock next)
         {

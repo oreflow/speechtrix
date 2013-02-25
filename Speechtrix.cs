@@ -16,6 +16,7 @@ namespace Speechtrix
 		const int nextLevelLines = 10;
         
         bool newBlock;
+        bool game;
         bool[,] gamefield; //matris med positioner, där vi använder 16(?) som standardbredd (position (0,0) är högst upp i vänstra hörnet)
         int speed; //hastighet för fallande block i ms(?)
         int level; //kanske för reglera speed/hur mycket poäng man får/vilka block som kommer
@@ -43,7 +44,7 @@ namespace Speechtrix
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
             graphicsThread.Start();
 
-            Thread.Sleep(10000);
+            Thread.Sleep(6000);
 
             Debug.Print("created graphics");
         }
@@ -56,7 +57,6 @@ namespace Speechtrix
 				Speechtrix sp = new Speechtrix();
                 
 				sp.newGame();
-                sp.play();
 
                 
 		//	}
@@ -67,15 +67,17 @@ namespace Speechtrix
                 for (int y = startY; y < endY; y++)
                     gamefield[x, y] = false;
 
-            speed = 1000;
+            speed = 500;
             level = 1;
             score = 0;
             linesToNextLevel = nextLevelLines;
+            game = true;
 
             TimerThread timer = new TimerThread(ref g);
             tt = new Thread(new ThreadStart(timer.Run));
             tt.Start();
             updateScore(score);
+            play();
         }
 
         void copyNextToCurrent()
@@ -110,7 +112,7 @@ namespace Speechtrix
 
             newBlock = true;
 
-            for (short i=0; !checkEnd(); i++)
+            for (short i=0; !checkEnd() && game; i++)
             {
                 if (newBlock)
                 {
@@ -152,6 +154,8 @@ namespace Speechtrix
                 }
             }
             g.lockBlock(current, next);
+            if (current.y == 0)
+                game = false;
             newBlock = true;
         }
 
@@ -371,6 +375,15 @@ namespace Speechtrix
                 current.x++;
                 g.setBlock(current); // makes the graphics bug a bit
             }
+        }
+        public void keyN()
+        {
+            if (game)
+            {
+                tt.Abort();
+                g.resetColors();
+            }
+            newGame();
         }
     }
     class TimerThread
