@@ -21,12 +21,16 @@ namespace Speechtrix
 
             
             SpeechRecognizer spRecognizer = new SpeechRecognizer();
-            spRecognizer.Enabled = true;
+            
             Grammar g = new Grammar(buildGrammar());
+            spRecognizer.UnloadAllGrammars();
             spRecognizer.LoadGrammar(g);
-
+            
+            spRecognizer.Enabled = true;
             spRecognizer.SpeechRecognized +=
                 new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
+            //spRecognizer.EmulateRecognize("Right");
+            
 
         }
 
