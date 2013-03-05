@@ -31,6 +31,7 @@ namespace Speechtrix
 
 				spEngine.UnloadAllGrammars();
 				spEngine.LoadGrammar(g);
+				Console.Write(spEngine.BabbleTimeout);
 
 				listGrammars(spEngine);
 
@@ -74,7 +75,7 @@ namespace Speechtrix
 			}
 			else
 			{
-			//	callBack.notUnderstand();
+				callBack.notUnderstand();
 			}
 
         }
