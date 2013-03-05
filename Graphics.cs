@@ -15,7 +15,7 @@ namespace Speechtrix
 {
     public class Graphics
     {
-        static bool debug = false;
+        static bool debug = true;
         private static Surface screen;
         static bool fullScreen = false;
         static int SCREEN_HEIGHT = 720;//(int) System.Windows.SystemParameters.PrimaryScreenHeight;
@@ -185,7 +185,7 @@ namespace Speechtrix
                 // draw and example "next block"
          //       DrawNextBlock(0, 0, Color.FromArgb(0, 122, 0));
                 //FillCircle(100,100,100,Color.FromArgb(255,255,255));
-                drawBlip(Color.FromArgb(255, 255, 255));
+                drawBlip(Color.FromArgb(255, 10, 10));
             }
         }
 
@@ -285,11 +285,31 @@ namespace Speechtrix
             int midX = posX + radius;
             int midY = posY + radius;
 
+
             for (int x = posX; x < (posX + diameter); x++)
                 for (int y = posY; y < (posY + diameter); y++)
                 {
                     if(Math.Sqrt(Math.Pow(x - midX,2) + Math.Pow(y - midY,2))<radius)
                         screen.Draw(new Point(x, y), col);
+                }
+
+        }
+        private static void StyleCircle(int posX, int posY, int radius, Color col)
+        {
+            int diameter = 2 * radius;
+            int midX = posX + radius;
+            int midY = posY + radius;
+            double intensity = 0.3;
+
+            for (int x = posX; x < (posX + diameter); x++)
+                for (int y = posY; y < (posY + diameter); y++)
+                {
+                    int distance = (int) Math.Sqrt(Math.Pow(x - midX, 2) + Math.Pow(y - midY, 2));
+                    if(distance < radius)
+                     screen.Draw(new Point(x, y), Color.FromArgb(
+                                    Math.Max(0, Math.Min((int)(col.R * (1 - intensity * distance / radius)), 255)),
+                                    Math.Max(0, Math.Min((int)(col.G * (1 - intensity * distance / radius)), 255)),
+                                    Math.Max(0, Math.Min((int)(col.B * (1 - intensity * distance / radius)), 255))));
                 }
 
         }
@@ -299,7 +319,7 @@ namespace Speechtrix
             int startX = (int)(SCREEN_WIDTH * 0.80);
             int startY = (int)(SCREEN_HEIGHT * 0.05);
             int radius = (int)(SCREEN_HEIGHT * 0.05);
-            FillCircle(startX, startY, radius, col);
+            StyleCircle(startX, startY, radius, col);
 
         }
    
@@ -760,6 +780,8 @@ namespace Speechtrix
         }
 		public void drawUnderstanding(Color color)
 		{
+            if (!running)
+                return;
             drawBlip(color);
             screen.Update();
 
