@@ -15,7 +15,7 @@ namespace Speechtrix
 {
     public class Graphics
     {
-        static bool debug = true;
+        static bool debug = false;
         private static Surface screen;
         static bool fullScreen = false;
         static int SCREEN_HEIGHT = 720;//(int) System.Windows.SystemParameters.PrimaryScreenHeight;
@@ -134,6 +134,7 @@ namespace Speechtrix
                 case Key.Escape:
                     running = false;
                     Events.QuitApplication();
+					callBack.quit();
                     break;
 
                 case Key.N:
@@ -707,6 +708,7 @@ namespace Speechtrix
         {
             running = false;
             Events.QuitApplication();
+			callBack.quit();
         }
         private static bool[,] getBlock(short ID, short rotation)
         {

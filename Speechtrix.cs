@@ -392,6 +392,11 @@ namespace Speechtrix
 			g.drawUnderstanding(Color.Green);
 		}
 
+		public void quit()
+		{
+			Environment.Exit(0);
+		}
+
 		public void notUnderstand()
 		{
 			g.drawUnderstanding(Color.Red);
