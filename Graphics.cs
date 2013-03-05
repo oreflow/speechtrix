@@ -15,7 +15,7 @@ namespace Speechtrix
 {
     public class Graphics
     {
-        static bool debug = true;
+        static bool debug = false;
         private static Surface screen;
         static bool fullScreen = false;
         static int SCREEN_HEIGHT = 720;//(int) System.Windows.SystemParameters.PrimaryScreenHeight;
