@@ -300,6 +300,7 @@ namespace Speechtrix
             int startY = (int)(SCREEN_HEIGHT * 0.05);
             int radius = (int)(SCREEN_HEIGHT * 0.05);
             FillCircle(startX, startY, radius, col);
+			Console.Write(col);
 
         }
    
