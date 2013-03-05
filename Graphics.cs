@@ -758,6 +758,10 @@ namespace Speechtrix
                 }
             }
         }
+		public void drawUnderstanding(Color color)
+		{
+
+		}
         static void copyNextToCurrent(LogicBlock next)
         {
             current.nr = next.nr;
