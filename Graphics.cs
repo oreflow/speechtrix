@@ -18,8 +18,8 @@ namespace Speechtrix
         static bool debug = false;
         private static Surface screen;
         static bool fullScreen = false;
-        static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
-        static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
+        static int SCREEN_HEIGHT = 720;//(int) System.Windows.SystemParameters.PrimaryScreenHeight;
+        static int SCREEN_WIDTH = 1280; //(int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
         static int blockX;
         static int blockSize;
@@ -184,6 +184,8 @@ namespace Speechtrix
           //      DrawBlock(0, 0, 2, 2, Color.FromArgb(0, 122, 0));
                 // draw and example "next block"
          //       DrawNextBlock(0, 0, Color.FromArgb(0, 122, 0));
+                //FillCircle(100,100,100,Color.FromArgb(255,255,255));
+                drawBlip(Color.FromArgb(255, 255, 255));
             }
         }
 
@@ -276,6 +278,29 @@ namespace Speechtrix
             for (int x = posX; x < (posX + sizeX); x++)
                 for (int y = posY; y < (posY + sizeY); y++)
                     screen.Draw(new Point(x, y), col);
+        }
+        private static void FillCircle(int posX, int posY, int radius, Color col)
+        {
+            int diameter = 2 * radius;
+            int midX = posX + radius;
+            int midY = posY + radius;
+
+            for (int x = posX; x < (posX + diameter); x++)
+                for (int y = posY; y < (posY + diameter); y++)
+                {
+                    if(Math.Sqrt(Math.Pow(x - midX,2) + Math.Pow(y - midY,2))<radius)
+                        screen.Draw(new Point(x, y), col);
+                }
+
+        }
+
+        private static void drawBlip(Color col)
+        {
+            int startX = (int)(SCREEN_WIDTH * 0.80);
+            int startY = (int)(SCREEN_HEIGHT * 0.05);
+            int radius = (int)(SCREEN_HEIGHT * 0.05);
+            FillCircle(startX, startY, radius, col);
+
         }
    
         private static void DrawNextBlock(LogicBlock lb)
@@ -735,6 +760,8 @@ namespace Speechtrix
         }
 		public void drawUnderstanding(Color color)
 		{
+            drawBlip(color);
+            screen.Update();
 
 		}
         static void copyNextToCurrent(LogicBlock next)
