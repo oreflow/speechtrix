@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Recognition;
+using System.Speech.Recognition.SrgsGrammar;
 using System.Speech.Synthesis;
 using System.Diagnostics;
 
@@ -121,6 +122,8 @@ namespace Speechtrix
             // se: http://www.c-sharpcorner.com/UploadFile/mahesh/programming-speech-in-wpf-speech-recognition/
 
             GrammarBuilder gBuilder = new GrammarBuilder();
+			gBuilder.Append(new Choices("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", " "));
+			gBuilder.Append(new Choices("to the", " "));
             gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit", "Crazy Shit"));
             return gBuilder;
         }
@@ -134,4 +137,70 @@ namespace Speechtrix
 
         }
     }
+
+	private SrgsDocument tetrisSrgs()
+	{
+		// Create SrgsDocument
+		SrgsDocument document = new SrgsDocument();
+ 
+		// Create Root Rule
+		SrgsRule rootRule = new SrgsRule("Tetris commands");
+		rootRule.Scope = SrgsRuleScope.Public;
+ 
+		rootRule.Elements.Add(new SrgsItem("Left Right Grammar "));
+ 
+		// Create months
+		SrgsOneOf oneOfNumbers = new SrgsOneOf(
+			new SrgsItem("One"),
+			new SrgsItem("Two"),
+			new SrgsItem("Three"),
+			new SrgsItem("Four"),
+			new SrgsItem("Five"),
+			new SrgsItem("Six"),
+			new SrgsItem("Seven"),
+			new SrgsItem("Eight"),
+			new SrgsItem("Nine")
+		);
+		SrgsRule ruleNumbers = new SrgsRule("Numbers", oneOfNumbers);
+		SrgsItem toThe = new SrgsItem(0,1,"to the");
+		SrgsOneOf direction = new SrgsOneOf(new SrgsItem("Left", "Right"));
+		SrgsRule ruleDirection = new SrgsRule("Direction", direction);
+		SrgsItem ruleMove = new SrgsItem(new SrgsRuleRef(ruleNumbers), toThe, new SrgsRuleRef(ruleDirection));
+ 
+		SrgsOneOf commands = new SrgsOneOf("Down", "Rotate", "Quit", "Crazy shit");
+		SrgsRule ruleCommands = new SrgsRule("Commands", commands);
+		
+		// Add items to root Rule
+		rootRule.Elements.Add(ruleMove);
+		rootRule.Elements.Add(ruleCommands);
+ 
+ 
+		// Add all Rules to Document
+		document.Rules.Add(rootRule, ruleMove, ruleCommands);
+	  // Add some extra sperate Rules
+		SrgsText textItem = new SrgsText("Start of the Document.");
+		SrgsRule textRule = new SrgsRule("TextItem");
+		textRule.Elements.Add(textItem);
+		document.Rules.Add(textRule);
+ 
+		SrgsItem stringItem = new SrgsItem("Item as String.");
+		SrgsRule itemRule = new SrgsRule("ItemRule");
+		itemRule.Elements.Add(stringItem);
+		document.Rules.Add(itemRule);
+ 
+		SrgsItem elementItem = new SrgsItem();
+		SrgsRule elementRule = new SrgsRule("ElementRule");
+		elementRule.Elements.Add(elementItem);
+		document.Rules.Add(elementRule);
+ 
+		// Set Document Root
+		document.Root = rootRule;
+ 
+		// Save Created SRGS Document to XML file
+		XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
+		document.WriteSrgs(writer);
+		writer.Close();
+ 
+		return document;
+	}
 }
