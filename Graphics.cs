@@ -760,6 +760,8 @@ namespace Speechtrix
         }
 		public void drawUnderstanding(Color color)
 		{
+            drawBlip(color);
+            screen.Update();
 
 		}
         static void copyNextToCurrent(LogicBlock next)
