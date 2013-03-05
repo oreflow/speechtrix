@@ -36,7 +36,10 @@ namespace Speechtrix
 				listGrammars(spEngine);
 
 				spEngine.SpeechRecognized +=
-					new EventHandler<SpeechRecognizedEventArgs>(spEngine_SpeechRecognized);
+					new EventHandler<SpeechRecognizedEventArgs>(sp_speechRecognized);
+
+				spEngine.SpeechRecognitionRejected +=
+					new EventHandler<SpeechRecognitionRejectedEventArgs>(sp_speechRejected);
 
 				spEngine.SetInputToDefaultAudioDevice();
 
@@ -48,8 +51,13 @@ namespace Speechtrix
 
         }
 
+		void sp_speechRejected(Object sender, SpeechRecognitionRejectedEventArgs args)
+		{
+			Debug.Print("Speech not recognized: " + args.Result.Text);
+			callBack.notUnderstand();
+		}
 
-        void spEngine_SpeechRecognized( Object sender, SpeechRecognizedEventArgs args)
+        void sp_speechRecognized(Object sender, SpeechRecognizedEventArgs args)
         {
             Debug.Print("Speech recognized: " + args.Result.Text);
 
@@ -73,11 +81,6 @@ namespace Speechtrix
 				callBack.keyUp();
 				callBack.understand();
 			}
-			else
-			{
-				callBack.notUnderstand();
-			}
-
         }
 		private static void listGrammars(SpeechRecognitionEngine recognizer)
 		{
