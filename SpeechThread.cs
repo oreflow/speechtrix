@@ -11,18 +11,26 @@ namespace Speechtrix
 {
     class SpeechThread
     {
+        SpeechSynthesizer ss;
         Speechtrix callBack;
+        SpeechRecognitionEngine spEngine;
         public SpeechThread(Speechtrix _callBack)
         {
             callBack = _callBack;
-            SpeechSynthesizer ss = new SpeechSynthesizer();
-            ss.SpeakAsync("Initializing speech component.");
+            ss = new SpeechSynthesizer();
+            PromptBuilder p = new PromptBuilder();
+            p.StartStyle(new PromptStyle(PromptEmphasis.None));
+            
+            p.AppendText("Initializing speech component.");
+            p.EndStyle();
+
+            ss.SpeakAsync(p);
+            
             Debug.Print("Playing first synthesis");
 
             
      //       SpeechRecognizer spRecognizer = new SpeechRecognizer();
-			SpeechRecognitionEngine spEngine =
-				new SpeechRecognitionEngine(
+			spEngine = new SpeechRecognitionEngine(
 					new System.Globalization.CultureInfo("en-US"));
 
 				Grammar g = new Grammar(buildGrammar());
@@ -105,6 +113,16 @@ namespace Speechtrix
 			}
 			Console.WriteLine();
 		}
+        public void speak(String str)
+        {
+            PromptBuilder p = new PromptBuilder();
+            p.StartStyle(new PromptStyle(PromptEmphasis.Strong));
+
+            p.AppendText(str);
+            p.EndStyle();
+
+            ss.SpeakAsync(p);
+        }
         private GrammarBuilder buildGrammar()
         {
             // lol, om man inte vill göra en så här simpel grammatik så använder man typ Srgs för att skapa ett VXML-dokument
