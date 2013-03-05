@@ -134,6 +134,7 @@ namespace Speechtrix
                 case Key.Escape:
                     running = false;
                     Events.QuitApplication();
+					callBack.quit();
                     break;
 
                 case Key.N:
@@ -707,6 +708,7 @@ namespace Speechtrix
         {
             running = false;
             Events.QuitApplication();
+			callBack.quit();
         }
         private static bool[,] getBlock(short ID, short rotation)
         {

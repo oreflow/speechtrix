@@ -81,6 +81,10 @@ namespace Speechtrix
 				callBack.keyUp();
 				callBack.understand();
 			}
+			else if (args.Result.Text.Equals("Quit"))
+			{
+				callBack.quit();
+			}
         }
 		private static void listGrammars(SpeechRecognitionEngine recognizer)
 		{
@@ -107,7 +111,7 @@ namespace Speechtrix
             // se: http://www.c-sharpcorner.com/UploadFile/mahesh/programming-speech-in-wpf-speech-recognition/
 
             GrammarBuilder gBuilder = new GrammarBuilder();
-            gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate"));
+            gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit"));
             return gBuilder;
         }
 
