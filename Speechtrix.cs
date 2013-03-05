@@ -45,7 +45,7 @@ namespace Speechtrix
             graphicsThread.Start();
             SpeechThread sp = new SpeechThread(this);
 
-            Thread.Sleep(6000);
+            Thread.Sleep(3000);
 
             Debug.Print("created graphics");
         }
@@ -68,7 +68,7 @@ namespace Speechtrix
                 for (int y = startY; y < endY; y++)
                     gamefield[x, y] = false;
 
-            speed = 500;
+            speed = 1000;
             level = 1;
             score = 0;
             linesToNextLevel = nextLevelLines;
@@ -386,6 +386,18 @@ namespace Speechtrix
             }
             newGame();
         }
+
+		public void understand()
+		{
+			g.drawUnderstanding(Color.Green);
+		}
+
+		public void notUnderstand()
+		{
+			g.drawUnderstanding(Color.Red);
+		}
+
+
     }
     class TimerThread
     {

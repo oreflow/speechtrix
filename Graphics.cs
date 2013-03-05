@@ -17,7 +17,7 @@ namespace Speechtrix
     {
         static bool debug = false;
         private static Surface screen;
-        static bool fullScreen = true;
+        static bool fullScreen = false;
         static int SCREEN_HEIGHT = (int) System.Windows.SystemParameters.PrimaryScreenHeight;
         static int SCREEN_WIDTH = (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
@@ -733,6 +733,10 @@ namespace Speechtrix
                 }
             }
         }
+		public void drawUnderstanding(Color color)
+		{
+
+		}
         static void copyNextToCurrent(LogicBlock next)
         {
             current.nr = next.nr;
