@@ -12,6 +12,7 @@ namespace Speechtrix
     class SpeechThread
     {
         Speechtrix callBack;
+		Boolean inverted = false;
         public SpeechThread(Speechtrix _callBack)
         {
             callBack = _callBack;
@@ -19,35 +20,33 @@ namespace Speechtrix
             ss.SpeakAsync("Initializing speech component.");
             Debug.Print("Playing first synthesis");
 
-            
-     //       SpeechRecognizer spRecognizer = new SpeechRecognizer();
 			SpeechRecognitionEngine spEngine =
 				new SpeechRecognitionEngine(
 					new System.Globalization.CultureInfo("en-US"));
 
-				Grammar g = new Grammar(buildGrammar());
-				listGrammars(spEngine);
-				g.Name = "Tetris";
+			Grammar g = new Grammar(buildGrammar());
+			listGrammars(spEngine);
+			g.Name = "Tetris";
 
-				spEngine.UnloadAllGrammars();
-				spEngine.LoadGrammar(g);
-				Console.Write(spEngine.BabbleTimeout);
+			spEngine.UnloadAllGrammars();
+			spEngine.LoadGrammar(g);
+			Console.Write(spEngine.BabbleTimeout);
 
-				listGrammars(spEngine);
+			listGrammars(spEngine);
 
-				spEngine.SpeechRecognized +=
-					new EventHandler<SpeechRecognizedEventArgs>(sp_speechRecognized);
+			spEngine.SpeechRecognized +=
+				new EventHandler<SpeechRecognizedEventArgs>(sp_speechRecognized);
 
-				spEngine.SpeechRecognitionRejected +=
-					new EventHandler<SpeechRecognitionRejectedEventArgs>(sp_speechRejected);
+			spEngine.SpeechRecognitionRejected +=
+				new EventHandler<SpeechRecognitionRejectedEventArgs>(sp_speechRejected);
 
-				spEngine.SetInputToDefaultAudioDevice();
+			spEngine.SetInputToDefaultAudioDevice();
 
-				spEngine.RecognizeAsync(RecognizeMode.Multiple);
-				//       spRecognizer.Enabled = true;
-				//      spRecognizer.SpeechRecognized +=
-				//          new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
-				//spRecognizer.EmulateRecognize("Right");
+			spEngine.RecognizeAsync(RecognizeMode.Multiple);
+			//       spRecognizer.Enabled = true;
+			//      spRecognizer.SpeechRecognized +=
+			//          new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
+			//spRecognizer.EmulateRecognize("Right");
 
         }
 
@@ -63,12 +62,18 @@ namespace Speechtrix
 
             if(args.Result.Text.Equals("Right"))
             {
-                callBack.keyRight();
+				if (!inverted)
+					callBack.keyRight();
+				else
+					callBack.keyLeft();
 				callBack.understand();
             }
             else if (args.Result.Text.Equals("Left"))
             {
-                callBack.keyLeft();
+				if (!inverted)
+					callBack.keyLeft();
+				else
+					callBack.keyRight();
 				callBack.understand();
             }
             else if (args.Result.Text.Equals("Down"))
@@ -84,6 +89,11 @@ namespace Speechtrix
 			else if (args.Result.Text.Equals("Quit"))
 			{
 				callBack.quit();
+			}
+			else if (args.Result.Text.Equals("Crazy Shit"))
+			{
+				if (inverted) inverted = false;
+				else inverted = true;
 			}
         }
 		private static void listGrammars(SpeechRecognitionEngine recognizer)
@@ -111,7 +121,7 @@ namespace Speechtrix
             // se: http://www.c-sharpcorner.com/UploadFile/mahesh/programming-speech-in-wpf-speech-recognition/
 
             GrammarBuilder gBuilder = new GrammarBuilder();
-            gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit"));
+            gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit", "Crazy Shit"));
             return gBuilder;
         }
 
