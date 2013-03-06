@@ -16,6 +16,7 @@ namespace Speechtrix
 	{
         SpeechSynthesizer ss;
 		Speechtrix callBack;
+        bool inverted;
         SpeechRecognitionEngine spEngine;
 		public SpeechThread(Speechtrix _callBack)
 		{
@@ -38,7 +39,7 @@ namespace Speechtrix
 
 			Grammar tetrisg = tetrisSrgs();
 			
-			Grammar xmlgrammar = new Grammar(@"C:\Users\Jesper\Dropbox\Visual 2012 workspace\Projects\Speechtrix\speechtrix\bin\Debug\DynamicSRGSDocument.xml");
+			Grammar xmlgrammar = new Grammar("DynamicSRGSDocument.xml");
 
 			tetrisg.Enabled = true;
 			Console.Write(tetrisg.Loaded);
@@ -48,9 +49,9 @@ namespace Speechtrix
 			// Load the grammar to the SpeechRecognitionEngine.
 			spEngine.LoadGrammar(tetrisg);
 
-			Grammar g = new Grammar(buildGrammar());
+			//Grammar g = new Grammar(buildGrammar());
 			listGrammars(spEngine);
-			g.Name = "Tetris";
+			//g.Name = "Tetris";
 			Console.Write(tetrisg.Loaded);
 			//	spEngine.LoadGrammar(g);
 
@@ -80,44 +81,111 @@ namespace Speechtrix
 
 		void sp_speechRecognized(Object sender, SpeechRecognizedEventArgs args)
 		{
-			Debug.Print("Speech recognized: " + args.Result.Text);
+			Console.Write("Speech recognized: " + args.Result.Text);
+            if (args.Result.Text.Contains("Right"))
+            {
+                if (args.Result.Text.Equals("Right"))
+                {
+                    if (!inverted)
+                        callBack.keyRight();
+                    else
+                        callBack.keyLeft();
+                    callBack.understand();
+                }
+                else if (getInt(args.Result.Text.Split().First()) != 0 && // the first word in the recognized sentence is a number 
+                        (args.Result.Text.Split().Length == 2 ||            // and the length is either 2 or 4
+                         (args.Result.Text.Split().Length == 4 &&
+                          args.Result.Text.Split().ElementAt(1).Equals("to") &&          //where word 2 (index 1) == "to" and word 3 (index 2) is "the" if the length was 4
+                          args.Result.Text.Split().ElementAt(2).Equals("the"))
+                        )
+                    )             
+                {
+                    int number = getInt(args.Result.Text.Split().First());
+                    for (int i = 0; i < number; i++)
+                    {
+                        if (!inverted)
+                            callBack.keyRight();
+                        else
+                            callBack.keyLeft();
+                    }
+                        callBack.understand();
+                }
 
-			if (args.Result.Text.Equals("Right"))
-			{
-				if (!inverted)
-					callBack.keyRight();
-				else
-					callBack.keyLeft();
-				callBack.understand();
-			}
-			else if (args.Result.Text.Equals("Left"))
-			{
-				if (!inverted)
-					callBack.keyLeft();
-				else
-					callBack.keyRight();
-				callBack.understand();
-			}
-			else if (args.Result.Text.Equals("Down"))
-			{
-				callBack.keyDown();
-				callBack.understand();
-			}
-			else if (args.Result.Text.Equals("Rotate"))
-			{
-				callBack.keyUp();
-				callBack.understand();
-			}
-			else if (args.Result.Text.Equals("Quit"))
-			{
-				callBack.quit();
-			}
-			else if (args.Result.Text.Equals("Crazy Shit"))
-			{
-				if (inverted) inverted = false;
-				else inverted = true;
-			}
+            }
+            else if (args.Result.Text.Contains("Left"))
+            {
+                if (args.Result.Text.Equals("Left"))
+                {
+                    if (!inverted)
+                        callBack.keyLeft();
+                    else
+                        callBack.keyRight();
+                    callBack.understand();
+                }
+                else if (getInt(args.Result.Text.Split().First()) != 0 && // the first word in the recognized sentence is a number
+                        (args.Result.Text.Split().Length == 2 ||            // the length is either 2 or 4
+                         (args.Result.Text.Split().Length == 4 &&
+                          args.Result.Text.Split().ElementAt(1).Equals("to") &&          //where word 2 (index 1) == "to" and word 3 (index 2) is "the" if the length was 4
+                          args.Result.Text.Split().ElementAt(2).Equals("the"))
+                        )
+                    )
+                {
+                    int number = getInt(args.Result.Text.Split().First());
+                    for (int i = 0; i < number; i++)
+                    {
+                        if (!inverted)
+                            callBack.keyLeft();
+                        else
+                            callBack.keyRight();
+                    }
+                    callBack.understand();
+                }
+
+            }
+            else if (args.Result.Text.Equals("Down"))
+            {
+                callBack.keyDown();
+                callBack.understand();
+            }
+            else if (args.Result.Text.Equals("Rotate"))
+            {
+                callBack.keyUp();
+                callBack.understand();
+            }
+            else if (args.Result.Text.Equals("Quit"))
+            {
+                callBack.quit();
+            }
+            else if (args.Result.Text.Equals("Crazy Shit"))
+            {
+                if (inverted) inverted = false;
+                else inverted = true;
+            }
 		}
+
+        public static int getInt(String str)
+        {
+            if (str.Equals("One"))
+                return 1;
+            else if (str.Equals("Two"))
+                return 2;
+            else if (str.Equals("Three"))
+                return 3;
+            else if (str.Equals("Four"))
+                return 4;
+            else if (str.Equals("Five"))
+                return 5;
+            else if (str.Equals("Six"))
+                return 6;
+            else if (str.Equals("Seven"))
+                return 7;
+            else if (str.Equals("Eight"))
+                return 8;
+            else if (str.Equals("Nine"))
+                return 9;
+            return 0;
+        }
+
 		private static void listGrammars(SpeechRecognitionEngine recognizer)
 		{
 			// Make a copy of the recognizer's grammar collection.
@@ -177,7 +245,7 @@ namespace Speechtrix
 			rootRule.Scope = SrgsRuleScope.Public;
 			
 			SrgsOneOf oneOfNumbers = new SrgsOneOf();
-			oneOfNumbers.Items.Add(new SrgsItem(0,1,"One"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "One"));
 			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Two"));
 			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Three"));
 			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Four"));
