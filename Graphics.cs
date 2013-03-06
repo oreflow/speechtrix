@@ -18,8 +18,8 @@ namespace Speechtrix
         static bool debug = false;
         private static Surface screen;
         static bool fullScreen = false;
-        static int SCREEN_HEIGHT = 720;//(int) System.Windows.SystemParameters.PrimaryScreenHeight;
-        static int SCREEN_WIDTH = 1280; //(int) System.Windows.SystemParameters.PrimaryScreenWidth;
+        static int SCREEN_HEIGHT = 720; // (int) System.Windows.SystemParameters.PrimaryScreenHeight;
+        static int SCREEN_WIDTH = 1280; // (int) System.Windows.SystemParameters.PrimaryScreenWidth;
         static int blockY;
         static int blockX;
         static int blockSize;

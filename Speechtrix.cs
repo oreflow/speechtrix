@@ -28,6 +28,7 @@ namespace Speechtrix
         Thread graphicsThread;
         LogicBlock current, next, rotateCheck;
         Random rand;
+        SpeechThread sp;
 
         public Speechtrix()
         {
@@ -43,7 +44,7 @@ namespace Speechtrix
             g = new Graphics(width, height, this);
 			graphicsThread = new Thread(new ThreadStart(Graphics.Run));
             graphicsThread.Start();
-            SpeechThread sp = new SpeechThread(this);
+            sp = new SpeechThread(this);
 
             Thread.Sleep(3000);
 
@@ -55,9 +56,9 @@ namespace Speechtrix
 	//		Console.WriteLine("Would you like to play?");
 	//		if (Console.Read() == "y")
 		//	{
-				Speechtrix sp = new Speechtrix();
+				Speechtrix speechtrix = new Speechtrix();
                 
-				sp.newGame();
+				speechtrix.newGame();
 
                 
 		//	}
@@ -283,6 +284,7 @@ namespace Speechtrix
                     gamefield[x, y] = gamefield[x, y - 1];
 				}
 			}
+            sp.speak("Jippee!");
 		}
 
         bool canGoLeft()
