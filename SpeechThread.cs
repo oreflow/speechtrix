@@ -8,6 +8,7 @@ using System.Speech.Recognition.SrgsGrammar;
 using System.Speech.Synthesis;
 using System.Diagnostics;
 using System.IO;
+using System.Xml;
 
 namespace Speechtrix
 {
@@ -33,10 +34,17 @@ namespace Speechtrix
 			spEngine = new SpeechRecognitionEngine(
 					new System.Globalization.CultureInfo("en-US"));
 
+			spEngine.UnloadAllGrammars();
+
 			Grammar tetrisg = tetrisSrgs();
+			
+			Grammar xmlgrammar = new Grammar(@"C:\Users\Jesper\Dropbox\Visual 2012 workspace\Projects\Speechtrix\speechtrix\bin\Debug\DynamicSRGSDocument.xml");
 
 			tetrisg.Enabled = true;
 			Console.Write(tetrisg.Loaded);
+
+			spEngine.UnloadAllGrammars();
+
 			// Load the grammar to the SpeechRecognitionEngine.
 			spEngine.LoadGrammar(tetrisg);
 
@@ -44,9 +52,7 @@ namespace Speechtrix
 			listGrammars(spEngine);
 			g.Name = "Tetris";
 			Console.Write(tetrisg.Loaded);
-			spEngine.UnloadAllGrammars();
 			//	spEngine.LoadGrammar(g);
-			Console.Write(spEngine.BabbleTimeout);
 
 			listGrammars(spEngine);
 
@@ -58,7 +64,7 @@ namespace Speechtrix
 
 			spEngine.SetInputToDefaultAudioDevice();
 
-			spEngine.RecognizeAsync();
+			spEngine.RecognizeAsync(RecognizeMode.Multiple);
 			//       spRecognizer.Enabled = true;
 			//      spRecognizer.SpeechRecognized +=
 			//          new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
@@ -165,75 +171,61 @@ namespace Speechtrix
 
 		private Grammar tetrisSrgs()
 		{
-			// Create SrgsDocument
 			SrgsDocument document = new SrgsDocument();
 
-			// Create Root Rule
-			SrgsRule rootRule = new SrgsRule("Tetriscommands");
+			SrgsRule rootRule = new SrgsRule("RootRule");
 			rootRule.Scope = SrgsRuleScope.Public;
+			
+			SrgsOneOf oneOfNumbers = new SrgsOneOf();
+			oneOfNumbers.Items.Add(new SrgsItem(0,1,"One"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Two"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Three"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Four"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Five"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Six"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Seven"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Eight"));
+			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Nine"));
 
-			rootRule.Elements.Add(new SrgsItem("Left Right Grammar "));
+			document.Mode = SrgsGrammarMode.Voice;
+			document.Rules.Add(rootRule);
+			document.Root = rootRule;
 
-			SrgsItem elementItem = new SrgsItem();
-			SrgsRule elementRule = new SrgsRule("ElementRule");
-			elementRule.Elements.Add(elementItem);
-			document.Rules.Add(elementRule);
-
-			SrgsOneOf oneOfNumbers = new SrgsOneOf(
-				new SrgsItem("One"),
-				new SrgsItem("Two"),
-				new SrgsItem("Three"),
-				new SrgsItem("Four"),
-				new SrgsItem("Five"),
-				new SrgsItem("Six"),
-				new SrgsItem("Seven"),
-				new SrgsItem("Eight"),
-				new SrgsItem("Nine")
-			);
 			SrgsRule ruleNumbers = new SrgsRule("Numb", oneOfNumbers);
 			SrgsItem toThe = new SrgsItem(0, 1, "to the");
 			SrgsOneOf direction = new SrgsOneOf(new SrgsItem("Left"), new SrgsItem("Right"));
 			SrgsRule ruleDirection = new SrgsRule("Direction", direction);
 			SrgsItem move = new SrgsItem(oneOfNumbers, toThe, direction);
-			SrgsRule ruleMove = new SrgsRule("Moves", move);
+			SrgsRule ruleMove = new SrgsRule("Moves");
+			ruleMove.Scope = SrgsRuleScope.Public;
+			ruleMove.Elements.Add(move);
+			document.Rules.Add(ruleMove);
 
 			SrgsOneOf oneOfCommands = new SrgsOneOf("Down", "Rotate", "Quit", "Crazy shit");
 			SrgsItem commands = new SrgsItem(oneOfCommands);
-			SrgsRule ruleCommands = new SrgsRule("Commands", commands);
+			SrgsRule ruleCommands = new SrgsRule("Commands");
+			ruleCommands.Scope = SrgsRuleScope.Public;
+			ruleCommands.Elements.Add(commands);
+			document.Rules.Add(ruleCommands);
 
-			// Add items to root Rule
-			rootRule.Elements.Add(move);
-			rootRule.Elements.Add(commands);
+			rootRule.Add(new SrgsRuleRef(ruleMove));
 
-			// Add all Rules to Document
-			document.Rules.Add(rootRule, ruleMove, ruleCommands);
-			// Add some extra sperate Rules
-			SrgsText textItem = new SrgsText("Start of the Document.");
-			SrgsRule textRule = new SrgsRule("TextItem");
-			textRule.Elements.Add(textItem);
-			document.Rules.Add(textRule);
-
-			SrgsItem stringItem = new SrgsItem("Item as String.");
-			SrgsRule itemRule = new SrgsRule("ItemRule");
-			itemRule.Elements.Add(stringItem);
-			document.Rules.Add(itemRule);
-
+			SrgsOneOf ro = new SrgsOneOf(move, commands);
+			SrgsItem rootcommands = new SrgsItem(ro);
+			SrgsRule roo = new SrgsRule("Rootcommands");
+			roo.Scope = SrgsRuleScope.Public;
+			roo.Elements.Add(rootcommands);
+			document.Rules.Add(roo);
 
 			// Set Document Root
-			document.Root = rootRule;
-
+			document.Root = roo;
+			
 			// Save Created SRGS Document to XML file
-			//		XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
-			//		document.WriteSrgs(writer);
-			//		writer.Close();
-
-			return new Grammar(document, "Tetriscommands");
-		}
-		private void compileGrammar(SrgsDocument srgsDoc, string cfgPath)
-		{
-			FileStream fs = new FileStream(cfgPath, FileMode.Create);
-			SrgsGrammarCompiler.Compile(srgsDoc, (Stream)fs);
-			fs.Close();
+					XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
+					document.WriteSrgs(writer);
+					writer.Close();
+			
+			return new Grammar(document);
 		}
 	}
 }
