@@ -58,11 +58,6 @@ namespace Speechtrix
 			spEngine.SetInputToDefaultAudioDevice();
 
 			spEngine.RecognizeAsync(RecognizeMode.Multiple);
-			//       spRecognizer.Enabled = true;
-			//      spRecognizer.SpeechRecognized +=
-			//          new EventHandler<SpeechRecognizedEventArgs>(SpeechRecognized);
-			//spRecognizer.EmulateRecognize("Right");
-
 		}
 
 		void sp_speechRejected(Object sender, SpeechRecognitionRejectedEventArgs args)
@@ -74,7 +69,7 @@ namespace Speechtrix
 		void sp_speechRecognized(Object sender, SpeechRecognizedEventArgs args)
 		{
 			Debug.Print("Speech recognized: " + args.Result.Text);
-
+			
 			if (args.Result.Text.Equals("Right"))
 			{
 				if (!inverted)
@@ -160,15 +155,15 @@ namespace Speechtrix
 			rootRule.Scope = SrgsRuleScope.Public;
 			
 			SrgsOneOf oneOfNumbers = new SrgsOneOf();
-			oneOfNumbers.Items.Add(new SrgsItem(0,1,"One"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Two"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Three"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Four"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Five"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Six"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Seven"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Eight"));
-			oneOfNumbers.Items.Add(new SrgsItem(0, 1, "Nine"));
+			oneOfNumbers.Items.Add(new SrgsItem("One"));
+			oneOfNumbers.Items.Add(new SrgsItem("Two"));
+			oneOfNumbers.Items.Add(new SrgsItem("Three"));
+			oneOfNumbers.Items.Add(new SrgsItem("Four"));
+			oneOfNumbers.Items.Add(new SrgsItem("Five"));
+			oneOfNumbers.Items.Add(new SrgsItem("Six"));
+			oneOfNumbers.Items.Add(new SrgsItem("Seven"));
+			oneOfNumbers.Items.Add(new SrgsItem("Eight"));
+			oneOfNumbers.Items.Add(new SrgsItem("Nine"));
 
 			document.Mode = SrgsGrammarMode.Voice;
 			document.Rules.Add(rootRule);
@@ -178,7 +173,8 @@ namespace Speechtrix
 			SrgsItem toThe = new SrgsItem(0, 1, "to the");
 			SrgsOneOf direction = new SrgsOneOf(new SrgsItem("Left"), new SrgsItem("Right"));
 			SrgsRule ruleDirection = new SrgsRule("Direction", direction);
-			SrgsItem move = new SrgsItem(oneOfNumbers, toThe, direction);
+			SrgsItem howmuch = new SrgsItem(0,1,oneOfNumbers, toThe);
+			SrgsItem move = new SrgsItem(howmuch, direction);
 			SrgsRule ruleMove = new SrgsRule("Moves");
 			ruleMove.Scope = SrgsRuleScope.Public;
 			ruleMove.Elements.Add(move);
@@ -204,9 +200,9 @@ namespace Speechtrix
 			document.Root = roo;
 			
 			// Save Created SRGS Document to XML file
-					XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
-					document.WriteSrgs(writer);
-					writer.Close();
+			XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
+			document.WriteSrgs(writer);
+			writer.Close();
 			
 			return new Grammar(document);
 		}
