@@ -16,7 +16,7 @@ namespace Speechtrix
 	{
         SpeechSynthesizer ss;
 		Speechtrix callBack;
-        bool inverted;
+		bool inverted = false;
         SpeechRecognitionEngine spEngine;
 		public SpeechThread(Speechtrix _callBack)
 		{
@@ -39,10 +39,9 @@ namespace Speechtrix
 
 			Grammar tetrisg = tetrisSrgs();
 			
-			Grammar xmlgrammar = new Grammar("DynamicSRGSDocument.xml");
+	//		Grammar xmlgrammar = new Grammar("DynamicSRGSDocument.xml");
 
 			tetrisg.Enabled = true;
-			Console.Write(tetrisg.Loaded);
 
 			spEngine.UnloadAllGrammars();
 
@@ -50,9 +49,9 @@ namespace Speechtrix
 			spEngine.LoadGrammar(tetrisg);
 
 			//Grammar g = new Grammar(buildGrammar());
-			listGrammars(spEngine);
+		//	listGrammars(spEngine);
 			//g.Name = "Tetris";
-			Console.Write(tetrisg.Loaded);
+		//	Console.Write(tetrisg.Loaded);
 			//	spEngine.LoadGrammar(g);
 
 			listGrammars(spEngine);
@@ -84,7 +83,7 @@ namespace Speechtrix
 			Console.Write("Speech recognized: " + args.Result.Text);
             if (args.Result.Text.Contains("Right"))
             {
-                if (args.Result.Text.Equals("Right"))
+				if (args.Result.Text.Equals("Right") || args.Result.Text.Equals("to the Right"))
                 {
                     if (!inverted)
                         callBack.keyRight();
@@ -114,7 +113,7 @@ namespace Speechtrix
             }
             else if (args.Result.Text.Contains("Left"))
             {
-                if (args.Result.Text.Equals("Left"))
+				if (args.Result.Text.Equals("Left") || args.Result.Text.Equals("to the Left"))
                 {
                     if (!inverted)
                         callBack.keyLeft();
@@ -152,14 +151,15 @@ namespace Speechtrix
                 callBack.keyUp();
                 callBack.understand();
             }
-            else if (args.Result.Text.Equals("Quit"))
+			else if (args.Result.Text.Equals("Quit") || args.Result.Text.Equals("Exit"))
             {
                 callBack.quit();
             }
-            else if (args.Result.Text.Equals("Crazy Shit"))
+            else if (args.Result.Text.Equals("Crazy shit"))
             {
                 if (inverted) inverted = false;
                 else inverted = true;
+				Debug.Print("\n " + inverted);
             }
 		}
 
@@ -223,7 +223,7 @@ namespace Speechtrix
 			GrammarBuilder gBuilder = new GrammarBuilder();
 			gBuilder.Append(new Choices("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", " "));
 			gBuilder.Append(new Choices("to the", " "));
-			gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit", "Crazy Shit"));
+			gBuilder.Append(new Choices("Right", "Left", "Down", "Rotate", "Quit", "Crazy shit", "Exit"));
 			return gBuilder;
 		}
 
@@ -269,7 +269,7 @@ namespace Speechtrix
 			ruleMove.Elements.Add(move);
 			document.Rules.Add(ruleMove);
 
-			SrgsOneOf oneOfCommands = new SrgsOneOf("Down", "Rotate", "Quit", "Crazy shit");
+			SrgsOneOf oneOfCommands = new SrgsOneOf("Down", "Rotate", "Quit", "Crazy shit", "Exit");
 			SrgsItem commands = new SrgsItem(oneOfCommands);
 			SrgsRule ruleCommands = new SrgsRule("Commands");
 			ruleCommands.Scope = SrgsRuleScope.Public;
@@ -289,10 +289,10 @@ namespace Speechtrix
 			document.Root = roo;
 			
 			// Save Created SRGS Document to XML file
-					XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
+	/*				XmlWriter writer = XmlWriter.Create("DynamicSRGSDocument.xml");
 					document.WriteSrgs(writer);
 					writer.Close();
-			
+		*/	
 			return new Grammar(document);
 		}
 	}
